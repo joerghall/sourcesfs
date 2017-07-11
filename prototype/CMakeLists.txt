@@ -43,6 +43,14 @@ add_executable(sourcesfs
     ${prototype_sources}
 )
 
-target_link_libraries(sourcesfs
-    osxfuse
-)
+if(UNIX AND NOT APPLE)
+    target_link_libraries(sourcesfs
+        fuse
+    )
+elseif(APPLE)
+    target_link_libraries(sourcesfs
+        osxfuse
+    )
+else()
+    message(FATAL_ERROR "Unsupported platform")
+endif()

@@ -92,12 +92,17 @@ hello_read(const char *path, char *buf, size_t size, off_t offset,
     return size;
 }
 
-static struct fuse_operations hello_filesystem_operations = {
-        .getattr = hello_getattr, /* To provide size, permissions, etc. */
-        .open    = hello_open,    /* To enforce read-only access.       */
-        .read    = hello_read,    /* To provide file content.           */
-        .readdir = hello_readdir, /* To provide directory listing.      */
-};
+static fuse_operations createOperations()
+{
+    fuse_operations result{ nullptr };
+    result.getattr = hello_getattr; /* To provide size, permissions, etc. */
+    result.open    = hello_open;    /* To enforce read-only access.       */
+    result.read    = hello_read;    /* To provide file content.           */
+    result.readdir = hello_readdir; /* To provide directory listing.      */
+    return result;
+}
+
+static struct fuse_operations hello_filesystem_operations = createOperations();
 
 int
 main(int argc, char **argv)
