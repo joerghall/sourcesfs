@@ -1,4 +1,14 @@
+# Prototype
 
+sourcefs <mount point> --workdir <path> --config <path>
+
+- Mapping of alias to git repository
+- On request
+    split path into alias / commit hash / path
+    clone the repository and checkout commit hash
+    serve the file for the path
+
+# Git get files for a given commit hash
 ```bash
 # Clone repo and checkout commit hash
 git clone https://github.com/joerghall/sourcesfs.git sourcesfs-19fc775a34edbd2f560c9f7002299f728796ad5b
