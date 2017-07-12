@@ -155,7 +155,7 @@ int Prototype::readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_
             return -1;
         }
     }
-    while (de = ::readdir(dp));
+    while ((de = ::readdir(dp)));
 
     return 0;
 }
