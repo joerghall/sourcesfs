@@ -22,8 +22,19 @@
 
 set(prototype_sources
     prototype.cpp
+    gitprovider.cpp
 )
 
 set(prototype_headers
     prototype.hpp
+    gitprovider.hpp
+)
+
+set(prototype_sources_test
+    tests/gitprovidertest.cpp
+    tests/test_sourcesfs.cpp
+    gitprovider.cpp
+)
+
+set(prototype_headers_test
 )

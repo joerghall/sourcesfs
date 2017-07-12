@@ -4,6 +4,7 @@
 
 ### Install perquisites 
 install FuseMacOSX - https://osxfuse.github.io
+brew install boost
 
 ### Build
 
