@@ -65,6 +65,9 @@ Prototype::~Prototype() = default;
 
 int Prototype::getattr(const char* path, struct stat* stbuf)
 {
+    //if (strcmp(path, file_path) != 0)
+    //    return -ENOENT;
+
     auto tempPath = _git->workingDirectory() / path;
     cout << "Prototype::getattr: path=" << path << ", tempPath=" << tempPath << endl;
     return stat(tempPath.c_str(), stbuf);
@@ -72,21 +75,27 @@ int Prototype::getattr(const char* path, struct stat* stbuf)
 
 int Prototype::open(const char* path, struct fuse_file_info* fi)
 {
-    cout << "Prototype::open" << endl;
+    //if (strcmp(path, file_path) != 0)
+    //    return -ENOENT;
 
-    // TODO: Pass through to Git repo
+    auto tempPath = _git->workingDirectory() / path;
+    cout << "Prototype::open: path=" << path << ", tempPath=" << tempPath << endl;
 
-    if (strcmp(path, file_path) != 0) /* We only recognize one file. */
-        return -ENOENT;
-
-    if ((fi->flags & O_ACCMODE) != O_RDONLY) /* Only reading allowed. */
+    if ((fi->flags & O_ACCMODE) != O_RDONLY)
+    {
+        // Only reading allowed
         return -EACCES;
+    }
 
+    fi->fh = ::open(tempPath.c_str(), fi->flags);
     return 0;
 }
 
 int Prototype::readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi)
 {
+    //if (strcmp(path, file_path) != 0)
+    //    return -ENOENT;
+
     auto tempPath = _git->workingDirectory() / path;
     cout << "Prototype::readdir: path=" << path << ", tempPath=" << tempPath << endl;
 
@@ -121,22 +130,26 @@ int Prototype::readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_
 
 int Prototype::read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi)
 {
+    //if (strcmp(path, file_path) != 0)
+    //    return -ENOENT;
+
     cout << "Prototype::read" << endl;
 
-    // TODO: Pass through to Git repo
-
-    if (strcmp(path, file_path) != 0)
-        return -ENOENT;
-
-    if (offset >= file_size) /* Trying to read past the end of file. */
+    /*
+    if (offset >= file_size)
+    {
+        // Read past end of file
         return 0;
+    }
 
-    if (offset + size > file_size) /* Trim the read to the file size. */
+    if (offset + size > file_size)
+    {
+        // Trim the read to the file size
         size = file_size - offset;
+    }
+    */
 
-    memcpy(buf, file_content + offset, size); /* Provide the content. */
-
-    return size;
+    return ::pread(fi->fh, buf, size, offset);
 }
 
 int main(int argc, char* argv[])
