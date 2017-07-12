@@ -5,5 +5,5 @@ RUN apt-get -y update
 RUN apt-get -y install software-properties-common
 RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
 RUN apt-get -y update
-RUN apt-get -y install build-essential cmake gcc-6 g++-6 libboost-all-dev libfuse-dev sudo
+RUN apt-get -y install build-essential cmake g++-6 gcc-6 git libboost-all-dev libfuse-dev sudo
 RUN echo "ALL  ALL=(ALL)  NOPASSWD: ALL" >> /etc/sudoers
