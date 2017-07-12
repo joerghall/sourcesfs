@@ -22,6 +22,7 @@
 cmake_minimum_required(VERSION 3.0)
 
 include(filelist.cmake)
+include(fuse.cmake)
 
 # Prototype
 include_directories(
@@ -44,18 +45,11 @@ add_executable(sourcesfs
     ${prototype_headers}
 )
 
-if(UNIX AND NOT APPLE)
-    target_link_libraries(sourcesfs
-        fuse
-    )
-elseif(APPLE)
-    target_link_libraries(sourcesfs
-        osxfuse
-        ${Boost_LIBRARIES}
-    )
-else()
-    message(FATAL_ERROR "Unsupported platform")
-endif()
+set(common_LIBRARIES ${Boost_LIBRARIES} ${fuse_LIBRARIES})
+
+target_link_libraries(sourcesfs
+    ${common_LIBRARIES}
+)
 
 # Prototype unittest
 #
@@ -68,18 +62,10 @@ add_executable(test_sourcesfs
     ${prototype_headers_test}
 )
 
-if(UNIX AND NOT APPLE)
-    target_link_libraries(test_sourcesfs
-#        sourcesfs
-        fuse
-    )
-elseif(APPLE)
-    target_link_libraries(test_sourcesfs
-#        sourcesfs
-        osxfuse
-        ${Boost_LIBRARIES}
-    )
-endif()
+target_link_libraries(test_sourcesfs
+#    sourcesfs
+    ${common_LIBRARIES}
+)
 
 add_test(NAME test_sourcesfs
     COMMAND test_sourcesfs

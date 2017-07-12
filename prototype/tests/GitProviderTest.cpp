@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "GitProvider.hpp"
 #include <catch/catch.hpp>
-#include <gitprovider.hpp>
 #include <memory>
 #include <iostream>
 #include <boost/filesystem.hpp>

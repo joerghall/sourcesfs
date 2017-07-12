@@ -19,22 +19,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+cmake_minimum_required(VERSION 3.0)
 
-set(prototype_sources
-    prototype.cpp
-    GitProvider.cpp
-)
-
-set(prototype_headers
-    prototype.hpp
-    GitProvider.hpp
-)
-
-set(prototype_sources_test
-    tests/GitProviderTest.cpp
-    tests/test_sourcesfs.cpp
-    GitProvider.cpp
-)
-
-set(prototype_headers_test
-)
+if(UNIX AND NOT APPLE)
+    set(fuse_LIBRARIES fuse)
+elseif(APPLE)
+    set(fuse_LIBRARIES osxfuse)
+else()
+    message(FATAL_ERROR "Unsupported platform")
+endif()
