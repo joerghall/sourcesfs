@@ -30,10 +30,6 @@
 namespace fs = boost::filesystem;
 using namespace std;
 
-static const char  *file_path      = "/hello.txt";
-static const char   file_content[] = "Hello World!\n";
-static const size_t file_size      = sizeof(file_content)/sizeof(char) - 1;
-
 class Prototype final : public FuseHandler
 {
 public:
