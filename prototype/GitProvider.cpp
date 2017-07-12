@@ -27,23 +27,39 @@ namespace fs = boost::filesystem;
 #include <iostream>
 #include <sstream>
 
+using namespace std;
 
-GitProvider::GitProvider(std::string repositoryUrl, std::string commitHash, std::string workingDirectory)
-    : _repositoryUrl(repositoryUrl)
-    , _commitHash(commitHash)
+namespace
 {
-    for(auto c : repositoryUrl)
+    string makeAliasName(const string& repositoryUrl)
     {
-        if(std::isalnum(c))
+        string aliasName;
+        for (auto c : repositoryUrl)
         {
-            _aliasName.push_back(c);
+            if (isalnum(c))
+            {
+                aliasName.push_back(c);
+            }
         }
+
+        return aliasName;
     }
 
-    // Make cache directory
-    fs::path cachePath = fs::path(workingDirectory) / fs::path(_aliasName + "_" + commitHash);
-    _workingDirectory = cachePath.c_str();
+    string makeWorkingDirectory(const string& commitHash, const string& workingDirectoryRoot, const string& aliasName)
+    {
+        // Make cache directory
+        fs::path cachePath = fs::path(workingDirectoryRoot) / fs::path(aliasName + "_" + commitHash);
+        auto workingDirectory = cachePath.c_str();
+        return workingDirectory;
+    }
+}
 
+GitProvider::GitProvider(const string& repositoryUrl, const string& commitHash, const string& workingDirectoryRoot)
+    : _aliasName(makeAliasName(repositoryUrl))
+    , _repositoryUrl(repositoryUrl)
+    , _commitHash(commitHash)
+    , _workingDirectory(makeWorkingDirectory(commitHash, workingDirectoryRoot, _aliasName))
+{
     if(fs::exists(_workingDirectory))
     {
         std::cout << "remove " << _workingDirectory << std::endl;

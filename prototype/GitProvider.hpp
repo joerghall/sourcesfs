@@ -19,18 +19,24 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#pragma once
+
 #include <string>
 
 class GitProvider
 {
 public:
+    GitProvider() = delete;
+    GitProvider(const GitProvider&) = delete;
+    GitProvider& operator=(const GitProvider&) = delete;
 
-    GitProvider(std::string repositoryUrl, std::string commitHash, std::string workingDirectory);
+public:
+    GitProvider(const std::string& repositoryUrl, const std::string& commitHash, const std::string& workingDirectoryRoot);
     ~GitProvider();
 
 private:
-    std::string _aliasName;
-    std::string _repositoryUrl;
-    std::string _commitHash;
-    std::string _workingDirectory;
+    const std::string _aliasName;
+    const std::string _repositoryUrl;
+    const std::string _commitHash;
+    const std::string _workingDirectory;
 };
