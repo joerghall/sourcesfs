@@ -22,17 +22,21 @@
 
 set(prototype_sources
     prototype.cpp
+    FuseUtil.cpp
     GitProvider.cpp
 )
 
 set(prototype_headers
     prototype.hpp
+    FuseHandler.hpp
+    FuseUtil.hpp
     GitProvider.hpp
 )
 
 set(prototype_sources_test
     tests/GitProviderTest.cpp
     tests/test_sourcesfs.cpp
+    FuseUtil.cpp
     GitProvider.cpp
 )
 

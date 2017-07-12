@@ -19,19 +19,53 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#include <iostream>
-
+#include "FuseHandler.hpp"
+#include "FuseUtil.hpp"
+#include "GitProvider.hpp"
+#include <cstring>
 #include <errno.h>
-#include <fcntl.h>
-#include <string.h>
-#include <fuse.h>
+
+namespace fs = boost::filesystem;
+using namespace std;
 
 static const char  *file_path      = "/hello.txt";
 static const char   file_content[] = "Hello World!\n";
 static const size_t file_size      = sizeof(file_content)/sizeof(char) - 1;
 
-static int
-hello_getattr(const char *path, struct stat *stbuf)
+class Prototype final : public FuseHandler
+{
+public:
+    Prototype(const Prototype&) = delete;
+    Prototype& operator=(const Prototype&) = delete;
+
+public:
+    Prototype();
+    ~Prototype();
+
+    int getattr(const char* path, struct stat* stbuf) override;
+    int open(const char* path, struct fuse_file_info* fi) override;
+    int readdir(const char* path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi) override;
+    int read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi) override;
+
+private:
+    // Example of state shared between handlers defined in this class
+    std::unique_ptr<GitProvider> _git;
+};
+
+Prototype::Prototype()
+{
+    fs::path workingDirectoryRoot = fs::temp_directory_path();
+    /*
+    _git = make_unique<GitProvider>(
+        "https://github.com/joerghall/sourcesfs.git",
+        "19fc775a34edbd2f560c9f7002299f728796ad5b",
+        workingDirectoryRoot.c_str());
+    */
+}
+
+Prototype::~Prototype() = default;
+
+int Prototype::getattr(const char* path, struct stat* stbuf)
 {
     memset(stbuf, 0, sizeof(struct stat));
 
@@ -48,8 +82,7 @@ hello_getattr(const char *path, struct stat *stbuf)
     return 0;
 }
 
-static int
-hello_open(const char *path, struct fuse_file_info *fi)
+int Prototype::open(const char* path, struct fuse_file_info* fi)
 {
     if (strcmp(path, file_path) != 0) /* We only recognize one file. */
         return -ENOENT;
@@ -60,9 +93,7 @@ hello_open(const char *path, struct fuse_file_info *fi)
     return 0;
 }
 
-static int
-hello_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
-              off_t offset, struct fuse_file_info *fi)
+int Prototype::readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi)
 {
     if (strcmp(path, "/") != 0) /* We only recognize the root directory. */
         return -ENOENT;
@@ -74,9 +105,7 @@ hello_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     return 0;
 }
 
-static int
-hello_read(const char *path, char *buf, size_t size, off_t offset,
-           struct fuse_file_info *fi)
+int Prototype::read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi)
 {
     if (strcmp(path, file_path) != 0)
         return -ENOENT;
@@ -92,20 +121,8 @@ hello_read(const char *path, char *buf, size_t size, off_t offset,
     return size;
 }
 
-static fuse_operations createOperations()
+int main(int argc, char* argv[])
 {
-    fuse_operations result{ nullptr };
-    result.getattr = hello_getattr; /* To provide size, permissions, etc. */
-    result.open    = hello_open;    /* To enforce read-only access.       */
-    result.read    = hello_read;    /* To provide file content.           */
-    result.readdir = hello_readdir; /* To provide directory listing.      */
-    return result;
-}
-
-static struct fuse_operations hello_filesystem_operations = createOperations();
-
-int
-main(int argc, char **argv)
-{
-    return fuse_main(argc, argv, &hello_filesystem_operations, NULL);
+    Prototype prototype;
+    return runFuse(argc, argv, prototype);
 }
