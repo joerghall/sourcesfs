@@ -45,17 +45,17 @@ namespace
         return aliasName;
     }
 
-    fs::path makeWorkingDirectory(const string& commitHash, const string& workingDirectoryRoot, const string& aliasName)
+    fs::path makeWorkingDirectory(const string& repositoryUrl, const string& commitHash, const string& workingDirectoryRoot)
     {
+        auto aliasName = makeAliasName(repositoryUrl);
         return fs::path(workingDirectoryRoot) / fs::path(aliasName + "_" + commitHash);
     }
 }
 
 GitProvider::GitProvider(const string& repositoryUrl, const string& commitHash, const string& workingDirectoryRoot)
-    : _aliasName(makeAliasName(repositoryUrl))
-    , _repositoryUrl(repositoryUrl)
+    : _repositoryUrl(repositoryUrl)
     , _commitHash(commitHash)
-    , _workingDirectory(makeWorkingDirectory(commitHash, workingDirectoryRoot, _aliasName))
+    , _workingDirectory(makeWorkingDirectory(repositoryUrl, commitHash, workingDirectoryRoot))
 {
     if(fs::exists(_workingDirectory))
     {

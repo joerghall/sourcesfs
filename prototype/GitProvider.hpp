@@ -36,7 +36,6 @@ public:
     ~GitProvider();
 
 private:
-    const std::string _aliasName;
     const std::string _repositoryUrl;
     const std::string _commitHash;
     const boost::filesystem::path _workingDirectory;
