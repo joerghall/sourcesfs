@@ -42,8 +42,10 @@ public:
 
     int getattr(const char* path, struct stat* stbuf) override;
     int open(const char* path, struct fuse_file_info* fi) override;
-    int readdir(const char* path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi) override;
     int read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi) override;
+    int release(const char* path, struct fuse_file_info* fi) override;
+    int readdir(const char* path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi) override;
+    int releasedir(const char* path, struct fuse_file_info* fi) override;
 
 private:
     std::unique_ptr<GitProvider> _git;
@@ -87,6 +89,40 @@ int Prototype::open(const char* path, struct fuse_file_info* fi)
     return 0;
 }
 
+int Prototype::read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi)
+{
+    //if (strcmp(path, file_path) != 0)
+    //    return -ENOENT;
+
+    cout << "Prototype::read" << endl;
+
+    /*
+    if (offset >= file_size)
+    {
+        // Read past end of file
+        return 0;
+    }
+
+    if (offset + size > file_size)
+    {
+        // Trim the read to the file size
+        size = file_size - offset;
+    }
+    */
+
+    return ::pread(fi->fh, buf, size, offset);
+}
+
+int Prototype::release(const char* path, struct fuse_file_info* fi)
+{
+    //if (strcmp(path, file_path) != 0)
+    //    return -ENOENT;
+
+    cout << "Prototype::release" << endl;
+
+    // TODO: Close file descriptor
+}
+
 int Prototype::readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi)
 {
     //if (strcmp(path, file_path) != 0)
@@ -124,28 +160,14 @@ int Prototype::readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_
     return 0;
 }
 
-int Prototype::read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi)
+int Prototype::releasedir(const char* path, struct fuse_file_info* fi)
 {
     //if (strcmp(path, file_path) != 0)
     //    return -ENOENT;
 
-    cout << "Prototype::read" << endl;
+    cout << "Prototype::releasedir" << endl;
 
-    /*
-    if (offset >= file_size)
-    {
-        // Read past end of file
-        return 0;
-    }
-
-    if (offset + size > file_size)
-    {
-        // Trim the read to the file size
-        size = file_size - offset;
-    }
-    */
-
-    return ::pread(fi->fh, buf, size, offset);
+    // TODO: Close file descriptor
 }
 
 int main(int argc, char* argv[])

@@ -37,6 +37,20 @@ namespace
         return self->open(path, fi);
     }
 
+    int fuse_read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi)
+    {
+        auto* ctx = fuse_get_context();
+        auto* self = static_cast<FuseHandler*>(ctx->private_data);
+        return self->read(path, buf, size, offset, fi);
+    }
+
+    int fuse_release(const char* path, struct fuse_file_info* fi)
+    {
+        auto* ctx = fuse_get_context();
+        auto* self = static_cast<FuseHandler*>(ctx->private_data);
+        return self->release(path, fi);
+    }
+
     int fuse_readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi)
     {
         auto* ctx = fuse_get_context();
@@ -44,11 +58,11 @@ namespace
         return self->readdir(path, buf, filler, offset, fi);
     }
 
-    int fuse_read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi)
+    int fuse_releasedir(const char* path, struct fuse_file_info* fi)
     {
         auto* ctx = fuse_get_context();
         auto* self = static_cast<FuseHandler*>(ctx->private_data);
-        return self->read(path, buf, size, offset, fi);
+        return self->releasedir(path, fi);
     }
 }
 
@@ -58,6 +72,8 @@ int runFuse(int argc, char* argv[], FuseHandler& handler)
     ops.getattr = fuse_getattr;
     ops.open = fuse_open;
     ops.read = fuse_read;
+    ops.release = fuse_release;
     ops.readdir = fuse_readdir;
+    ops.releasedir = fuse_releasedir;
     return fuse_main(argc, argv, &ops, &handler);
 }
