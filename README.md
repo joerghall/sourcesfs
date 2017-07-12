@@ -24,7 +24,7 @@ umount ~/sourcesfs
 
 ### Build
 
-See [`buildtools/ubuntu.docker`][docker-file] for example Docker image for building `sourcesfs`.
+See [`docker/ubuntu.docker`][docker-file] for example Docker image for building `sourcesfs`.
 
 ```
 mkdir debug
@@ -43,4 +43,4 @@ bin/sourcesfs -f -d ~/sourcesfs
 
 <tbd>
 
-[docker-file]: buildtools/ubuntu.docker
+[docker-file]: docker/ubuntu.docker
