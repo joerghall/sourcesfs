@@ -23,7 +23,9 @@
 #include "FuseUtil.hpp"
 #include "GitProvider.hpp"
 #include <cstring>
+#include <dirent.h>
 #include <errno.h>
+#include <iostream>
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -48,42 +50,32 @@ public:
     int read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi) override;
 
 private:
-    // Example of state shared between handlers defined in this class
     std::unique_ptr<GitProvider> _git;
 };
 
 Prototype::Prototype()
-{
-    fs::path workingDirectoryRoot = fs::temp_directory_path();
-    /*
-    _git = make_unique<GitProvider>(
+    : _git(make_unique<GitProvider>(
         "https://github.com/joerghall/sourcesfs.git",
         "19fc775a34edbd2f560c9f7002299f728796ad5b",
-        workingDirectoryRoot.c_str());
-    */
+        fs::temp_directory_path()))
+{
 }
 
 Prototype::~Prototype() = default;
 
 int Prototype::getattr(const char* path, struct stat* stbuf)
 {
-    memset(stbuf, 0, sizeof(struct stat));
-
-    if (strcmp(path, "/") == 0) { /* The root directory of our file system. */
-        stbuf->st_mode = S_IFDIR | 0755;
-        stbuf->st_nlink = 3;
-    } else if (strcmp(path, file_path) == 0) { /* The only file we have. */
-        stbuf->st_mode = S_IFREG | 0444;
-        stbuf->st_nlink = 1;
-        stbuf->st_size = file_size;
-    } else /* We reject everything else. */
-        return -ENOENT;
-
-    return 0;
+    auto tempPath = _git->workingDirectory() / path;
+    cout << "Prototype::getattr: path=" << path << ", tempPath=" << tempPath << endl;
+    return stat(tempPath.c_str(), stbuf);
 }
 
 int Prototype::open(const char* path, struct fuse_file_info* fi)
 {
+    cout << "Prototype::open" << endl;
+
+    // TODO: Pass through to Git repo
+
     if (strcmp(path, file_path) != 0) /* We only recognize one file. */
         return -ENOENT;
 
@@ -95,18 +87,44 @@ int Prototype::open(const char* path, struct fuse_file_info* fi)
 
 int Prototype::readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi)
 {
-    if (strcmp(path, "/") != 0) /* We only recognize the root directory. */
-        return -ENOENT;
+    auto tempPath = _git->workingDirectory() / path;
+    cout << "Prototype::readdir: path=" << path << ", tempPath=" << tempPath << endl;
 
-    filler(buf, ".", NULL, 0);           /* Current directory (.)  */
-    filler(buf, "..", NULL, 0);          /* Parent directory (..)  */
-    filler(buf, file_path + 1, NULL, 0); /* The only file we have. */
+    unique_ptr<DIR, decltype(&::closedir)> dir(::opendir(tempPath.c_str()), ::closedir);
+    if (!dir)
+    {
+        // TODO: Review error handling
+        return errno;
+    }
+
+    auto* dp = dir.get();
+
+    auto* de = ::readdir(dp);
+    if (!de)
+    {
+        // TODO: Review error handling
+        return errno;
+    }
+
+    do
+    {
+        if (filler(buf, de->d_name, nullptr, 0) != 0)
+        {
+            // TODO: Review error handling
+            return -1;
+        }
+    }
+    while (de = ::readdir(dp));
 
     return 0;
 }
 
 int Prototype::read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi)
 {
+    cout << "Prototype::read" << endl;
+
+    // TODO: Pass through to Git repo
+
     if (strcmp(path, file_path) != 0)
         return -ENOENT;
 

@@ -32,8 +32,10 @@ public:
     GitProvider& operator=(const GitProvider&) = delete;
 
 public:
-    GitProvider(const std::string& repositoryUrl, const std::string& commitHash, const std::string& workingDirectoryRoot);
+    GitProvider(const std::string& repositoryUrl, const std::string& commitHash, const boost::filesystem::path& workingDirectoryRoot);
     ~GitProvider();
+
+    const boost::filesystem::path& workingDirectory() const;
 
 private:
     const std::string _repositoryUrl;

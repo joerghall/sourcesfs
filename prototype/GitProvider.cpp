@@ -45,14 +45,14 @@ namespace
         return aliasName;
     }
 
-    fs::path makeWorkingDirectory(const string& repositoryUrl, const string& commitHash, const string& workingDirectoryRoot)
+    fs::path makeWorkingDirectory(const string& repositoryUrl, const string& commitHash, const fs::path& workingDirectoryRoot)
     {
         auto aliasName = makeAliasName(repositoryUrl);
         return fs::path(workingDirectoryRoot) / fs::path(aliasName + "_" + commitHash);
     }
 }
 
-GitProvider::GitProvider(const string& repositoryUrl, const string& commitHash, const string& workingDirectoryRoot)
+GitProvider::GitProvider(const string& repositoryUrl, const string& commitHash, const fs::path& workingDirectoryRoot)
     : _repositoryUrl(repositoryUrl)
     , _commitHash(commitHash)
     , _workingDirectory(makeWorkingDirectory(repositoryUrl, commitHash, workingDirectoryRoot))
@@ -97,4 +97,9 @@ GitProvider::~GitProvider()
     }
 
     std::cout << "LEAVE GitProvider::~GitProvider()" << std::endl;
+}
+
+const fs::path& GitProvider::workingDirectory() const
+{
+    return _workingDirectory;
 }
