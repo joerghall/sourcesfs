@@ -45,12 +45,9 @@ namespace
         return aliasName;
     }
 
-    string makeWorkingDirectory(const string& commitHash, const string& workingDirectoryRoot, const string& aliasName)
+    fs::path makeWorkingDirectory(const string& commitHash, const string& workingDirectoryRoot, const string& aliasName)
     {
-        // Make cache directory
-        fs::path cachePath = fs::path(workingDirectoryRoot) / fs::path(aliasName + "_" + commitHash);
-        auto workingDirectory = cachePath.c_str();
-        return workingDirectory;
+        return fs::path(workingDirectoryRoot) / fs::path(aliasName + "_" + commitHash);
     }
 }
 

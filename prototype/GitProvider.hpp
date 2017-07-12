@@ -21,6 +21,7 @@
 // SOFTWARE.
 #pragma once
 
+#include <boost/filesystem.hpp>
 #include <string>
 
 class GitProvider
@@ -38,5 +39,5 @@ private:
     const std::string _aliasName;
     const std::string _repositoryUrl;
     const std::string _commitHash;
-    const std::string _workingDirectory;
+    const boost::filesystem::path _workingDirectory;
 };
