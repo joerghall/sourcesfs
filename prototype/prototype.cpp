@@ -26,9 +26,51 @@
 #include <dirent.h>
 #include <errno.h>
 #include <iostream>
+#include <fstream>
+#include <json/json.hpp>
+#include <map>
 
+using json = nlohmann::json;
 namespace fs = boost::filesystem;
 using namespace std;
+
+#include <string>
+#include <regex>
+
+// Update the input string.
+std::string autoExpandEnvironmentVariables(std::string text)
+{
+    static std::regex env( "\\$\\{([^}]+)\\}" );
+    std::smatch match;
+    while ( std::regex_search( text, match, env ) ) {
+        const char * s = getenv( match[1].str().c_str() );
+        const std::string var( s == NULL ? "" : s );
+        text.replace( match[0].first, match[0].second, var );
+    }
+    return text;
+}
+
+class ProviderConfig
+{
+public:
+    ProviderConfig(const std::string &name, const std::string &type, const std::string &url)
+       : _name(name)
+       , _type(type)
+       , _url(url)
+    {}
+
+//    ProviderConfig(ProviderConfig&) = default;
+//    ProviderConfig(ProviderConfig&&) = default;
+//    ProviderConfig& operator=(ProviderConfig&) = default;
+//    ProviderConfig& operator=(ProviderConfig&&) = default;
+
+private:
+public:
+    std::string _name;
+    std::string _type;
+    std::string _url;
+};
+
 
 class Prototype final : public FuseHandler
 {
@@ -37,7 +79,7 @@ public:
     Prototype& operator=(const Prototype&) = delete;
 
 public:
-    Prototype();
+    Prototype(const json &config);
     ~Prototype();
 
     int getattr(const char* path, struct stat* stbuf) override;
@@ -48,36 +90,121 @@ public:
     int releasedir(const char* path, struct fuse_file_info* fi) override;
 
 private:
-    std::unique_ptr<GitProvider> _git;
+
+    std::string _defaultFallbackPath;
+    std::string FusePathToRealPath(const char* path);
+    std::map<std::string, ProviderConfig> _providerConfigs;
+    std::map<std::string, shared_ptr<GitProvider>> _providers;
 };
 
-Prototype::Prototype()
-    : _git(make_unique<GitProvider>(
-        "https://github.com/joerghall/sourcesfs.git",
-        "19fc775a34edbd2f560c9f7002299f728796ad5b",
-        fs::temp_directory_path()))
+Prototype::Prototype(const json& configs)
 {
+
+    _defaultFallbackPath = "/Users/jhallmann/test";
+
+    for (const auto& config : configs.get<json::object_t>())
+    {
+        const std::string name = config.first;
+        const std::string type = config.second.at("type");
+        const std::string url = config.second.at("url");
+        // _providers[name] =
+        //
+        ProviderConfig c(name, type, url);
+        _providerConfigs.insert(std::pair<std::string, ProviderConfig>(name, c));
+    }
 }
 
-Prototype::~Prototype() = default;
+Prototype::~Prototype()
+{
+    cout <<  "Prototype::~Prototype" << endl;
+}
+
+std::string Prototype::FusePathToRealPath(const char* path)
+{
+    // Split path
+    fs::path p = path;
+    vector<string> elements;
+    for(auto& part : p)
+    {
+        elements.push_back(part.native());
+    }
+
+    if(elements.size())
+    {
+        // Eliminate metadata files translations
+        // https://apple.stackexchange.com/questions/14980/why-are-dot-underscore-files-created-and-how-can-i-avoid-them
+        if(0==elements.back().find("._"))
+        {
+            return "";
+        }
+    }
+
+    if(elements.size()<2)
+    {
+        return _defaultFallbackPath;
+    }
+
+    auto it = _providerConfigs.find(elements[1]);
+    if(it == _providerConfigs.end())
+    {
+       return "";
+    }
+
+    shared_ptr<GitProvider> provider;
+    if (elements.size()>4)
+    {
+        // Path exists as provider?
+        fs::path idPath = fs::path(elements[1]) / fs::path(elements[2]) / fs::path(elements[3]) / fs::path(elements[4]);
+        auto itProvider = _providers.find(idPath.c_str());
+        if (itProvider == _providers.end())
+        {
+            const ProviderConfig &conf = it->second;
+
+            // Prepare final url
+            string url = conf._url;
+            auto f1 = url.find("${group}");
+            url.replace(f1, 8, elements[2]);
+            auto f2 = url.find("${name}");
+            url.replace(f2, 7, elements[3]);
+
+            provider = make_shared<GitProvider>(url, elements[4], fs::temp_directory_path());
+            _providers.insert(std::pair<std::string, shared_ptr<GitProvider>>(idPath.c_str(), provider));
+        } else {
+            provider = itProvider->second;
+        }
+
+        fs::path relPath;
+        for (auto element = elements.begin() + 5; element != elements.end(); ++element)
+        {
+            relPath /= *element;
+        }
+
+        fs::path absPath = provider->retrieve(relPath);
+        return absPath.c_str();
+    } else {
+        return _defaultFallbackPath;
+    }
+}
 
 int Prototype::getattr(const char* path, struct stat* stbuf)
 {
-    //if (strcmp(path, file_path) != 0)
-    //    return -ENOENT;
+    std::string fusedPath = FusePathToRealPath(path);
+    if(fusedPath=="")
+    {
+        return -ENOENT;
+    }
 
-    auto tempPath = _git->workingDirectory() / path;
-    cout << "Prototype::getattr: path=" << path << ", tempPath=" << tempPath << endl;
-    return stat(tempPath.c_str(), stbuf);
+    cout <<  "Prototype::getattr path=" << fusedPath << endl;
+    return ::stat(fusedPath.c_str(), stbuf);
 }
 
 int Prototype::open(const char* path, struct fuse_file_info* fi)
 {
-    //if (strcmp(path, file_path) != 0)
-    //    return -ENOENT;
-
-    auto tempPath = _git->workingDirectory() / path;
-    cout << "Prototype::open: path=" << path << ", tempPath=" << tempPath << endl;
+    std::string fusedPath = FusePathToRealPath(path);
+    if(fusedPath=="")
+    {
+        return -ENOENT;
+    }
 
     if ((fi->flags & O_ACCMODE) != O_RDONLY)
     {
@@ -85,53 +212,46 @@ int Prototype::open(const char* path, struct fuse_file_info* fi)
         return -EACCES;
     }
 
-    fi->fh = ::open(tempPath.c_str(), fi->flags);
+    cout <<  "Prototype::open path=" << fusedPath << endl;
+    fi->fh = ::open(fusedPath.c_str(), fi->flags);
     return 0;
 }
 
 int Prototype::read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi)
 {
-    //if (strcmp(path, file_path) != 0)
-    //    return -ENOENT;
-
-    cout << "Prototype::read" << endl;
-
-    /*
-    if (offset >= file_size)
+    std::string fusedPath = FusePathToRealPath(path);
+    if(fusedPath=="")
     {
-        // Read past end of file
-        return 0;
+        return -ENOENT;
     }
 
-    if (offset + size > file_size)
-    {
-        // Trim the read to the file size
-        size = file_size - offset;
-    }
-    */
-
+    cout <<  "Prototype::read path=" << fusedPath << endl;
     return ::pread(fi->fh, buf, size, offset);
 }
 
 int Prototype::release(const char* path, struct fuse_file_info* fi)
 {
-    //if (strcmp(path, file_path) != 0)
-    //    return -ENOENT;
+    std::string fusedPath = FusePathToRealPath(path);
+    if(fusedPath=="")
+    {
+        return -ENOENT;
+    }
 
-    cout << "Prototype::release" << endl;
-
-    // TODO: Close file descriptor
+    cout <<  "Prototype::release path=" << fusedPath << endl;
+    return ::close(fi->fh);;
 }
 
 int Prototype::readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi)
 {
-    //if (strcmp(path, file_path) != 0)
-    //    return -ENOENT;
+    std::string fusedPath = FusePathToRealPath(path);
+    if(fusedPath=="")
+    {
+        return -ENOENT;
+    }
 
-    auto tempPath = _git->workingDirectory() / path;
-    cout << "Prototype::readdir: path=" << path << ", tempPath=" << tempPath << endl;
+    cout <<  "Prototype::readdir path=" << fusedPath << endl;
 
-    unique_ptr<DIR, decltype(&::closedir)> dir(::opendir(tempPath.c_str()), ::closedir);
+    unique_ptr<DIR, decltype(&::closedir)> dir(::opendir(fusedPath.c_str()), ::closedir);
     if (!dir)
     {
         // TODO: Review error handling
@@ -162,16 +282,28 @@ int Prototype::readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_
 
 int Prototype::releasedir(const char* path, struct fuse_file_info* fi)
 {
-    //if (strcmp(path, file_path) != 0)
-    //    return -ENOENT;
+    std::string fusedPath = FusePathToRealPath(path);
+    if(fusedPath=="")
+    {
+        return -ENOENT;
+    }
 
-    cout << "Prototype::releasedir" << endl;
+    cout <<  "Prototype::releasedir path=" << fusedPath << endl;
+    return 0;
+}
 
-    // TODO: Close file descriptor
+json readDefaultConfig() {
+    fs::path configFileName = autoExpandEnvironmentVariables("${HOME}/.sourcesfs");
+    fstream configFile(configFileName.c_str(), ios_base::in);
+    json j;
+    configFile >> j;
+    std::cout << std::setw(4) << j << std::endl;
+    return j;
 }
 
 int main(int argc, char* argv[])
 {
-    Prototype prototype;
+    json config = readDefaultConfig();
+    Prototype prototype(config);
     return runFuse(argc, argv, prototype);
 }

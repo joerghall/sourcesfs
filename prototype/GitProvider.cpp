@@ -22,7 +22,7 @@
 #include "GitProvider.hpp"
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
-// #include <experimental/filesystem>
+//#include <experimental/filesystem>
 //namespace fs = std::experimental::filesystem;
 #include <iostream>
 #include <sstream>
@@ -102,4 +102,9 @@ GitProvider::~GitProvider()
 const fs::path& GitProvider::workingDirectory() const
 {
     return _workingDirectory;
+}
+
+fs::path GitProvider::retrieve(const fs::path& path)
+{
+    return _workingDirectory / path;
 }

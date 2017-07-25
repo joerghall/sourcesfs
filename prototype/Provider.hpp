@@ -21,28 +21,9 @@
 // SOFTWARE.
 #pragma once
 
-#include <boost/filesystem.hpp>
-#include <string>
-
-#include "Provider.hpp"
-
-class GitProvider: public Provider
+class Provider
 {
 public:
-    GitProvider() = delete;
-    GitProvider(const GitProvider&) = delete;
-    GitProvider& operator=(const GitProvider&) = delete;
-
-public:
-    GitProvider(const std::string& repositoryUrl, const std::string& commitHash, const boost::filesystem::path& workingDirectoryRoot);
-    virtual ~GitProvider() override;
-
-    const boost::filesystem::path& workingDirectory() const;
-
-    boost::filesystem::path retrieve(const boost::filesystem::path& path) override;
-
-private:
-    const std::string _repositoryUrl;
-    const std::string _commitHash;
-    const boost::filesystem::path _workingDirectory;
+    virtual ~Provider() = default;
+    virtual boost::filesystem::path retrieve(const boost::filesystem::path& path) = 0;
 };

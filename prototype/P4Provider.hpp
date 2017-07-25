@@ -26,23 +26,19 @@
 
 #include "Provider.hpp"
 
-class GitProvider: public Provider
+class P4Provider : public Provider
 {
 public:
-    GitProvider() = delete;
-    GitProvider(const GitProvider&) = delete;
-    GitProvider& operator=(const GitProvider&) = delete;
+//    P4Provider() = delete;
+    P4Provider(const P4Provider&) = delete;
+    P4Provider& operator=(const P4Provider&) = delete;
 
 public:
-    GitProvider(const std::string& repositoryUrl, const std::string& commitHash, const boost::filesystem::path& workingDirectoryRoot);
-    virtual ~GitProvider() override;
-
-    const boost::filesystem::path& workingDirectory() const;
+    P4Provider();
+    virtual ~P4Provider() override;
 
     boost::filesystem::path retrieve(const boost::filesystem::path& path) override;
 
 private:
-    const std::string _repositoryUrl;
-    const std::string _commitHash;
-    const boost::filesystem::path _workingDirectory;
+
 };

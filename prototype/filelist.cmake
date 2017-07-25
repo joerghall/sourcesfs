@@ -24,6 +24,8 @@ set(prototype_sources
     prototype.cpp
     FuseUtil.cpp
     GitProvider.cpp
+    CacheProvider.cpp
+    P4Provider.cpp
 )
 
 set(prototype_headers
@@ -31,6 +33,9 @@ set(prototype_headers
     FuseHandler.hpp
     FuseUtil.hpp
     GitProvider.hpp
+    CacheProvider.hpp
+    P4Provider.hpp
+    Provider.hpp
 )
 
 set(prototype_sources_test

@@ -19,30 +19,27 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#pragma once
-
+#include "CacheProvider.hpp"
 #include <boost/filesystem.hpp>
-#include <string>
+namespace fs = boost::filesystem;
+//#include <experimental/filesystem>
+//namespace fs = std::experimental::filesystem;
+#include <iostream>
+#include <sstream>
 
-#include "Provider.hpp"
+using namespace std;
 
-class GitProvider: public Provider
+CacheProvider::CacheProvider()
 {
-public:
-    GitProvider() = delete;
-    GitProvider(const GitProvider&) = delete;
-    GitProvider& operator=(const GitProvider&) = delete;
 
-public:
-    GitProvider(const std::string& repositoryUrl, const std::string& commitHash, const boost::filesystem::path& workingDirectoryRoot);
-    virtual ~GitProvider() override;
+}
 
-    const boost::filesystem::path& workingDirectory() const;
+CacheProvider::~CacheProvider()
+{
+    std::cout << "LEAVE CacheProvider::~CacheProvider()" << std::endl;
+}
 
-    boost::filesystem::path retrieve(const boost::filesystem::path& path) override;
-
-private:
-    const std::string _repositoryUrl;
-    const std::string _commitHash;
-    const boost::filesystem::path _workingDirectory;
-};
+boost::filesystem::path CacheProvider::retrieve(const boost::filesystem::path& path)
+{
+    return "";
+}
