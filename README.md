@@ -8,21 +8,25 @@ Currently supported providers:
 * Perforce
 * Local file system
 
-## Mac
+## macOS
 
-### Install perquisites 
-install FuseMacOSX - https://osxfuse.github.io
-brew install boost
+### Install prerequisites
+
+* Install [FuseMacOSX][fuse-macos]
+* Install Boost: `brew install boost`
 
 ### Build
 
 ### Run
+
 ```bash
 mkdir ~/sourcesfs
 bin/sourcesfs -f -d ~/sourcesfs
 ```
-### Cleanup 
-umount if you killed the fuse user space process
+
+### Cleanup
+
+Use `umount` to unmount the virtual file system if you kill the Fuse user space process before it can clean up properly:
 
 ```bash
 umount ~/sourcesfs
@@ -34,7 +38,7 @@ umount ~/sourcesfs
 
 See [`docker/ubuntu.docker`][docker-file] for example Docker image for building `sourcesfs`.
 
-```
+```bash
 mkdir debug
 cd debug
 cmake -DCMAKE_CC_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 -DCMAKE_BUILD_TYPE=DEBUG -G "Unix Makefiles" ..
@@ -42,7 +46,7 @@ cmake -DCMAKE_CC_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 -DCMAKE_BUILD_TYPE=DE
 
 ### Run
 
-```
+```bash
 mkdir ~/sourcesfs
 bin/sourcesfs -f -d ~/sourcesfs
 ```
@@ -73,3 +77,4 @@ SourcesFS is configured using a `.sourcesfs` file in your home directory. Here's
 ```
 
 [docker-file]: docker/ubuntu.docker
+[fuse-macos]: https://osxfuse.github.io
