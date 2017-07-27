@@ -55,7 +55,7 @@ bin/sourcesfs -f -d ~/sourcesfs
 
 <tbd>
 
-### Example configuration file
+## Example configuration file
 
 SourcesFS is configured using a `.sourcesfs` file in your home directory. Here's an example:
 
