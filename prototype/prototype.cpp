@@ -79,7 +79,6 @@ private:
     const std::string _url;
 };
 
-
 class Prototype final : public FuseHandler
 {
 public:
@@ -98,24 +97,33 @@ public:
     int releasedir(const char* path, struct fuse_file_info* fi) override;
 
 private:
+    static std::map<std::string, ProviderConfig> makeProviderConfigs(const json& configs);
     fs::path FusePathToRealPath(const char* path);
 
 private:
     const fs::path _defaultFallbackPath;
-    std::map<std::string, ProviderConfig> _providerConfigs;
+    const std::map<std::string, ProviderConfig> _providerConfigs;
     std::map<std::string, shared_ptr<Provider>> _providers;
 };
 
-Prototype::Prototype(const fs::path& defaultFallbackPath, const json& configs)
-    : _defaultFallbackPath(defaultFallbackPath)
+std::map<std::string, ProviderConfig> Prototype::makeProviderConfigs(const json& configs)
 {
+    std::map<std::string, ProviderConfig> providerConfigs;
     for (const auto& config : configs.get<json::object_t>())
     {
         const std::string& name = config.first;
         const std::string& type = config.second.at("type");
         const std::string& url = config.second.at("url");
-        _providerConfigs.insert(std::pair<std::string, ProviderConfig>(name, ProviderConfig(name, type, url)));
+        providerConfigs.insert(std::pair<std::string, ProviderConfig>(name, ProviderConfig(name, type, url)));
     }
+
+    return providerConfigs;
+}
+
+Prototype::Prototype(const fs::path& defaultFallbackPath, const json& configs)
+    : _defaultFallbackPath(defaultFallbackPath)
+    , _providerConfigs(makeProviderConfigs(configs))
+{
 }
 
 Prototype::~Prototype()
