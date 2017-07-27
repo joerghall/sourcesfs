@@ -25,6 +25,7 @@ namespace fs = boost::filesystem;
 //#include <experimental/filesystem>
 //namespace fs = std::experimental::filesystem;
 #include <iostream>
+#include <fstream>
 #include <sstream>
 
 using namespace std;
