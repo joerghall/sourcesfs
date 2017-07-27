@@ -53,7 +53,7 @@ bin/sourcesfs -f -d ~/sourcesfs
 
 ## Windows
 
-<tbd>
+TBD
 
 ## Example configuration file
 
