@@ -66,11 +66,14 @@ public:
 //    ProviderConfig& operator=(ProviderConfig&) = default;
 //    ProviderConfig& operator=(ProviderConfig&&) = default;
 
+    const std::string& name() const { return _name; }
+    const std::string& type() const { return _type; }
+    const std::string& url() const { return _url; }
+
 private:
-public:
-    std::string _name;
-    std::string _type;
-    std::string _url;
+    const std::string _name;
+    const std::string _type;
+    const std::string _url;
 };
 
 
@@ -155,7 +158,7 @@ std::string Prototype::FusePathToRealPath(const char* path)
     fs::path idPath;
     int pathOffset=0;
 
-    if(conf._type == "git")
+    if (conf.type() == "git")
     {
         pathOffset=5;
         if (elements.size() >= pathOffset)
@@ -168,7 +171,7 @@ std::string Prototype::FusePathToRealPath(const char* path)
                 const ProviderConfig &conf = it->second;
 
                 // Prepare final url
-                string url = conf._url;
+                string url = conf.url();
                 auto f1 = url.find("${group}");
                 url.replace(f1, 8, elements[2]);
                 auto f2 = url.find("${name}");
@@ -183,7 +186,7 @@ std::string Prototype::FusePathToRealPath(const char* path)
             }
         }
     }
-    else if(conf._type == "p4")
+    else if (conf.type() == "p4")
     {
         pathOffset=3;
         if (elements.size() >= pathOffset)
@@ -194,7 +197,7 @@ std::string Prototype::FusePathToRealPath(const char* path)
             if (itProvider == _providers.end())
             {
                 const ProviderConfig &conf = it->second;
-                provider = make_shared<P4Provider>(conf._url, elements[2], fs::temp_directory_path());
+                provider = make_shared<P4Provider>(conf.url(), elements[2], fs::temp_directory_path());
                 _providers.insert(make_pair(idPath.string(), provider));
             }
             else
@@ -203,7 +206,7 @@ std::string Prototype::FusePathToRealPath(const char* path)
             }
         }
     }
-    else if(conf._type == "cache")
+    else if (conf.type() == "cache")
     {
         pathOffset=2;
         if (elements.size() >= pathOffset)
@@ -215,7 +218,7 @@ std::string Prototype::FusePathToRealPath(const char* path)
         if (itProvider == _providers.end())
         {
             const ProviderConfig &conf = it->second;
-            provider = make_shared<CacheProvider>(conf._url);
+            provider = make_shared<CacheProvider>(conf.url());
             _providers.insert(make_pair(idPath.string(), provider));
         }
         else
