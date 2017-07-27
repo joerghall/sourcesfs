@@ -87,7 +87,7 @@ public:
     Prototype& operator=(const Prototype&) = delete;
 
 public:
-    Prototype(const json &config);
+    Prototype(const fs::path& defaultFallbackPath, const json &config);
     ~Prototype();
 
     int getattr(const char* path, struct stat* stbuf) override;
@@ -98,23 +98,22 @@ public:
     int releasedir(const char* path, struct fuse_file_info* fi) override;
 
 private:
+    fs::path FusePathToRealPath(const char* path);
 
-    std::string _defaultFallbackPath;
-    std::string FusePathToRealPath(const char* path);
+private:
+    const fs::path _defaultFallbackPath;
     std::map<std::string, ProviderConfig> _providerConfigs;
     std::map<std::string, shared_ptr<Provider>> _providers;
 };
 
-Prototype::Prototype(const json& configs)
+Prototype::Prototype(const fs::path& defaultFallbackPath, const json& configs)
+    : _defaultFallbackPath(defaultFallbackPath)
 {
-
-    _defaultFallbackPath = "/Users/jhallmann/test";
-
     for (const auto& config : configs.get<json::object_t>())
     {
-        const std::string name = config.first;
-        const std::string type = config.second.at("type");
-        const std::string url = config.second.at("url");
+        const std::string& name = config.first;
+        const std::string& type = config.second.at("type");
+        const std::string& url = config.second.at("url");
         _providerConfigs.insert(std::pair<std::string, ProviderConfig>(name, ProviderConfig(name, type, url)));
     }
 }
@@ -124,7 +123,7 @@ Prototype::~Prototype()
     cout <<  "Prototype::~Prototype" << endl;
 }
 
-std::string Prototype::FusePathToRealPath(const char* path)
+fs::path Prototype::FusePathToRealPath(const char* path)
 {
     // Split path
     fs::path p = path;
@@ -247,7 +246,7 @@ std::string Prototype::FusePathToRealPath(const char* path)
 
 int Prototype::getattr(const char* path, struct stat* stbuf)
 {
-    std::string fusedPath = FusePathToRealPath(path);
+    const auto fusedPath = FusePathToRealPath(path);
     if(fusedPath=="")
     {
         return -ENOENT;
@@ -259,7 +258,7 @@ int Prototype::getattr(const char* path, struct stat* stbuf)
 
 int Prototype::open(const char* path, struct fuse_file_info* fi)
 {
-    std::string fusedPath = FusePathToRealPath(path);
+    const auto fusedPath = FusePathToRealPath(path);
     if(fusedPath=="")
     {
         return -ENOENT;
@@ -278,7 +277,7 @@ int Prototype::open(const char* path, struct fuse_file_info* fi)
 
 int Prototype::read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi)
 {
-    std::string fusedPath = FusePathToRealPath(path);
+    const auto fusedPath = FusePathToRealPath(path);
     if(fusedPath=="")
     {
         return -ENOENT;
@@ -290,7 +289,7 @@ int Prototype::read(const char* path, char* buf, size_t size, off_t offset, stru
 
 int Prototype::release(const char* path, struct fuse_file_info* fi)
 {
-    std::string fusedPath = FusePathToRealPath(path);
+    const auto fusedPath = FusePathToRealPath(path);
     if(fusedPath=="")
     {
         return -ENOENT;
@@ -302,7 +301,7 @@ int Prototype::release(const char* path, struct fuse_file_info* fi)
 
 int Prototype::readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi)
 {
-    std::string fusedPath = FusePathToRealPath(path);
+    const auto fusedPath = FusePathToRealPath(path);
     if(fusedPath=="")
     {
         return -ENOENT;
@@ -341,7 +340,7 @@ int Prototype::readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_
 
 int Prototype::releasedir(const char* path, struct fuse_file_info* fi)
 {
-    std::string fusedPath = FusePathToRealPath(path);
+    const auto fusedPath = FusePathToRealPath(path);
     if(fusedPath=="")
     {
         return -ENOENT;
@@ -351,13 +350,8 @@ int Prototype::releasedir(const char* path, struct fuse_file_info* fi)
     return 0;
 }
 
-json readDefaultConfig() {
-    fs::path configFileName = autoExpandEnvironmentVariables("${HOME}/.sourcesfs");
-    if (!fs::exists(configFileName))
-    {
-        throw runtime_error(string("No SourcesFS configuration file found at ") + configFileName.string());
-    }
-
+json readDefaultConfig(const fs::path& configFileName)
+{
     fstream configFile(configFileName.c_str(), ios_base::in);
     json j;
     configFile >> j;
@@ -367,7 +361,20 @@ json readDefaultConfig() {
 
 int main(int argc, char* argv[])
 {
-    json config = readDefaultConfig();
-    Prototype prototype(config);
+    const fs::path configFileName = autoExpandEnvironmentVariables("${HOME}/.sourcesfs");
+    if (!fs::exists(configFileName))
+    {
+        throw runtime_error(string("No SourcesFS configuration file found at ") + configFileName.string());
+    }
+
+    // TODO: Derive this from configuration file!
+    const fs::path defaultFallbackPath = autoExpandEnvironmentVariables("${HOME}/test");
+    if (!fs::exists(defaultFallbackPath))
+    {
+        throw runtime_error(string("No default fallback path found at ") + defaultFallbackPath.string());
+    }
+
+    json config = readDefaultConfig(configFileName);
+    Prototype prototype(defaultFallbackPath, config);
     return runFuse(argc, argv, prototype);
 }
