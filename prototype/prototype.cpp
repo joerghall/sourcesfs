@@ -106,15 +106,15 @@ private:
     std::map<std::string, shared_ptr<Provider>> _providers;
 };
 
-std::map<std::string, ProviderConfig> Prototype::makeProviderConfigs(const json& configs)
+map<string, ProviderConfig> Prototype::makeProviderConfigs(const json& configs)
 {
-    std::map<std::string, ProviderConfig> providerConfigs;
+    map<string, ProviderConfig> providerConfigs;
     for (const auto& config : configs.get<json::object_t>())
     {
-        const std::string& name = config.first;
-        const std::string& type = config.second.at("type");
-        const std::string& url = config.second.at("url");
-        providerConfigs.insert(std::pair<std::string, ProviderConfig>(name, ProviderConfig(name, type, url)));
+        const auto& name = config.first;
+        const auto& type = config.second.at("type");
+        const auto& url = config.second.at("url");
+        providerConfigs.insert(pair<string, ProviderConfig>(name, ProviderConfig(name, type, url)));
     }
 
     return providerConfigs;
