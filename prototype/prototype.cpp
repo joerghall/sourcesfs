@@ -40,16 +40,19 @@ using namespace std;
 #include <regex>
 
 // Update the input string.
-std::string autoExpandEnvironmentVariables(std::string text)
+std::string autoExpandEnvironmentVariables(const std::string& text)
 {
     static std::regex env( "\\$\\{([^}]+)\\}" );
     std::smatch match;
-    while ( std::regex_search( text, match, env ) ) {
+    std::string result(text);
+    while (std::regex_search(result, match, env))
+    {
         const char * s = getenv( match[1].str().c_str() );
         const std::string var( s == NULL ? "" : s );
-        text.replace( match[0].first, match[0].second, var );
+        result.replace( match[0].first, match[0].second, var );
     }
-    return text;
+
+    return result;
 }
 
 class ProviderConfig
