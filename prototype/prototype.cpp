@@ -353,6 +353,11 @@ int Prototype::releasedir(const char* path, struct fuse_file_info* fi)
 
 json readDefaultConfig() {
     fs::path configFileName = autoExpandEnvironmentVariables("${HOME}/.sourcesfs");
+    if (!fs::exists(configFileName))
+    {
+        throw runtime_error(string("No SourcesFS configuration file found at ") + configFileName.string());
+    }
+
     fstream configFile(configFileName.c_str(), ios_base::in);
     json j;
     configFile >> j;
