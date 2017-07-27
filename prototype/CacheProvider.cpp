@@ -29,7 +29,9 @@ namespace fs = boost::filesystem;
 
 using namespace std;
 
-CacheProvider::CacheProvider()
+CacheProvider::CacheProvider(const std::string& repositoryUrl)
+    : _repositoryUrl(repositoryUrl)
+    , _workingDirectory(repositoryUrl)
 {
 
 }
@@ -41,5 +43,5 @@ CacheProvider::~CacheProvider()
 
 boost::filesystem::path CacheProvider::retrieve(const boost::filesystem::path& path)
 {
-    return "";
+    return _workingDirectory / path;
 }

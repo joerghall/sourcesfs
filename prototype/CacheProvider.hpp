@@ -29,16 +29,17 @@
 class CacheProvider: public Provider
 {
 public:
-//    CacheProvider() = delete;
+    CacheProvider() = delete;
     CacheProvider(const CacheProvider&) = delete;
     CacheProvider& operator=(const CacheProvider&) = delete;
 
 public:
-    CacheProvider();
+    CacheProvider(const std::string& repositoryUrl);
     virtual ~CacheProvider() override;
 
     boost::filesystem::path retrieve(const boost::filesystem::path& path) override;
 
 private:
-
+    const std::string _repositoryUrl;
+    const boost::filesystem::path _workingDirectory;
 };

@@ -29,7 +29,33 @@ namespace fs = boost::filesystem;
 
 using namespace std;
 
-P4Provider::P4Provider()
+namespace
+{
+    string makeAliasName(const string& repositoryUrl)
+    {
+        string aliasName;
+        for (auto c : repositoryUrl)
+        {
+            if (isalnum(c))
+            {
+                aliasName.push_back(c);
+            }
+        }
+
+        return aliasName;
+    }
+
+    fs::path makeWorkingDirectory(const string& repositoryUrl, const string& commitNumber, const fs::path& workingDirectoryRoot)
+    {
+        auto aliasName = makeAliasName(repositoryUrl);
+        return fs::path(workingDirectoryRoot) / fs::path(aliasName + "_" + commitNumber);
+    }
+}
+
+P4Provider::P4Provider(const std::string& repositoryUrl, const std::string& commitNumber, const boost::filesystem::path& workingDirectoryRoot)
+    : _repositoryUrl(repositoryUrl)
+    , _commitNumber(commitNumber)
+    , _workingDirectory(workingDirectoryRoot)
 {
 
 }

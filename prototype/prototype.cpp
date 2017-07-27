@@ -22,6 +22,8 @@
 #include "FuseHandler.hpp"
 #include "FuseUtil.hpp"
 #include "GitProvider.hpp"
+#include "P4Provider.hpp"
+#include "CacheProvider.hpp"
 #include <cstring>
 #include <dirent.h>
 #include <errno.h>
@@ -94,7 +96,7 @@ private:
     std::string _defaultFallbackPath;
     std::string FusePathToRealPath(const char* path);
     std::map<std::string, ProviderConfig> _providerConfigs;
-    std::map<std::string, shared_ptr<GitProvider>> _providers;
+    std::map<std::string, shared_ptr<Provider>> _providers;
 };
 
 Prototype::Prototype(const json& configs)
@@ -107,10 +109,7 @@ Prototype::Prototype(const json& configs)
         const std::string name = config.first;
         const std::string type = config.second.at("type");
         const std::string url = config.second.at("url");
-        // _providers[name] =
-        //
-        ProviderConfig c(name, type, url);
-        _providerConfigs.insert(std::pair<std::string, ProviderConfig>(name, c));
+        _providerConfigs.insert(std::pair<std::string, ProviderConfig>(name, ProviderConfig(name, type, url)));
     }
 }
 
@@ -150,38 +149,92 @@ std::string Prototype::FusePathToRealPath(const char* path)
        return "";
     }
 
-    shared_ptr<GitProvider> provider;
-    if (elements.size()>4)
+    const ProviderConfig &conf = it->second;
+    shared_ptr<Provider> provider;
+    fs::path relPath;
+    fs::path idPath;
+    int pathOffset=0;
+
+    if(conf._type == "git")
     {
-        // Path exists as provider?
-        fs::path idPath = fs::path(elements[1]) / fs::path(elements[2]) / fs::path(elements[3]) / fs::path(elements[4]);
-        auto itProvider = _providers.find(idPath.c_str());
+        pathOffset=5;
+        if (elements.size() >= pathOffset)
+        {
+            // Path exists as provider?
+            idPath = fs::path(elements[1]) / fs::path(elements[2]) / fs::path(elements[3]) / fs::path(elements[4]);
+            auto itProvider = _providers.find(idPath.string());
+            if (itProvider == _providers.end())
+            {
+                const ProviderConfig &conf = it->second;
+
+                // Prepare final url
+                string url = conf._url;
+                auto f1 = url.find("${group}");
+                url.replace(f1, 8, elements[2]);
+                auto f2 = url.find("${name}");
+                url.replace(f2, 7, elements[3]);
+
+                provider = make_shared<GitProvider>(url, elements[4], fs::temp_directory_path());
+                _providers.insert(make_pair(idPath.string(), provider));
+            }
+            else
+            {
+                provider = itProvider->second;
+            }
+        }
+    }
+    else if(conf._type == "p4")
+    {
+        pathOffset=3;
+        if (elements.size() >= pathOffset)
+        {
+            idPath = fs::path(elements[1]) / fs::path(elements[2]);
+
+            auto itProvider = _providers.find(idPath.string());
+            if (itProvider == _providers.end())
+            {
+                const ProviderConfig &conf = it->second;
+                provider = make_shared<P4Provider>(conf._url, elements[2], fs::temp_directory_path());
+                _providers.insert(make_pair(idPath.string(), provider));
+            }
+            else
+            {
+                provider = itProvider->second;
+            }
+        }
+    }
+    else if(conf._type == "cache")
+    {
+        pathOffset=2;
+        if (elements.size() >= pathOffset)
+        {
+            idPath = fs::path(elements[1]);
+        }
+
+        auto itProvider = _providers.find(idPath.string());
         if (itProvider == _providers.end())
         {
             const ProviderConfig &conf = it->second;
-
-            // Prepare final url
-            string url = conf._url;
-            auto f1 = url.find("${group}");
-            url.replace(f1, 8, elements[2]);
-            auto f2 = url.find("${name}");
-            url.replace(f2, 7, elements[3]);
-
-            provider = make_shared<GitProvider>(url, elements[4], fs::temp_directory_path());
-            _providers.insert(std::pair<std::string, shared_ptr<GitProvider>>(idPath.c_str(), provider));
-        } else {
+            provider = make_shared<CacheProvider>(conf._url);
+            _providers.insert(make_pair(idPath.string(), provider));
+        }
+        else
+        {
             provider = itProvider->second;
         }
+    }
 
-        fs::path relPath;
-        for (auto element = elements.begin() + 5; element != elements.end(); ++element)
+    if (provider)
+    {
+        for (auto element = elements.begin() + pathOffset; element != elements.end(); ++element)
         {
             relPath /= *element;
         }
-
         fs::path absPath = provider->retrieve(relPath);
         return absPath.c_str();
-    } else {
+    }
+    else
+    {
         return _defaultFallbackPath;
     }
 }

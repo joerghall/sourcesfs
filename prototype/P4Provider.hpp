@@ -29,16 +29,18 @@
 class P4Provider : public Provider
 {
 public:
-//    P4Provider() = delete;
+    P4Provider() = delete;
     P4Provider(const P4Provider&) = delete;
     P4Provider& operator=(const P4Provider&) = delete;
 
 public:
-    P4Provider();
+    P4Provider(const std::string& repositoryUrl, const std::string& commitNumber, const boost::filesystem::path& workingDirectoryRoot);
     virtual ~P4Provider() override;
 
     boost::filesystem::path retrieve(const boost::filesystem::path& path) override;
 
 private:
-
+    const std::string _repositoryUrl;
+    const std::string _commitNumber;
+    const boost::filesystem::path _workingDirectory;
 };
