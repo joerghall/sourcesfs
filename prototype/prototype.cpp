@@ -106,6 +106,17 @@ private:
     std::map<std::string, shared_ptr<Provider>> _providers;
 };
 
+Prototype::Prototype(const fs::path& defaultFallbackPath, const json& configs)
+    : _defaultFallbackPath(defaultFallbackPath)
+    , _providerConfigs(makeProviderConfigs(configs))
+{
+}
+
+Prototype::~Prototype()
+{
+    cout <<  "Prototype::~Prototype" << endl;
+}
+
 map<string, ProviderConfig> Prototype::makeProviderConfigs(const json& configs)
 {
     map<string, ProviderConfig> providerConfigs;
@@ -118,17 +129,6 @@ map<string, ProviderConfig> Prototype::makeProviderConfigs(const json& configs)
     }
 
     return providerConfigs;
-}
-
-Prototype::Prototype(const fs::path& defaultFallbackPath, const json& configs)
-    : _defaultFallbackPath(defaultFallbackPath)
-    , _providerConfigs(makeProviderConfigs(configs))
-{
-}
-
-Prototype::~Prototype()
-{
-    cout <<  "Prototype::~Prototype" << endl;
 }
 
 fs::path Prototype::FusePathToRealPath(const char* path)
