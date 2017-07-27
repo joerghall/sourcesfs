@@ -43,4 +43,25 @@ bin/sourcesfs -f -d ~/sourcesfs
 
 <tbd>
 
+### Example configuration file
+
+SourcesFS is configured using a `.sourcesfs` file in your home directory. Here's an example:
+
+```json
+{
+  "gitlab.com": {
+    "type": "git",
+    "url": "git@gitlab.com:${group}/${name}.git"
+  },
+  "perforce-server": {
+    "type": "p4",
+    "url": "perforce-server:1667"
+  },
+  "cache": {
+    "type": "cache",
+    "url": "/path/to/local/directory"
+  }
+}
+```
+
 [docker-file]: docker/ubuntu.docker
