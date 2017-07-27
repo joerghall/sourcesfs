@@ -1,5 +1,13 @@
 # Sources Filesystem
 
+Provides a virtual file system for mapping source files in debuggers such as GDB to source repositories
+
+Currently supported providers:
+
+* Git
+* Perforce
+* Local file system
+
 ## Mac
 
 ### Install perquisites 
