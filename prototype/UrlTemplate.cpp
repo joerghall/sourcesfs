@@ -28,7 +28,6 @@ string expandRepoUrlTemplate(
     vector<path_fragment>::const_iterator& iter,
     vector<path_fragment>::const_iterator& endIter)
 {
-    unordered_map<string, string> argValues;
     auto url(repoConfig.urlTemplate);
     for (const auto& arg : repoConfig.args)
     {
