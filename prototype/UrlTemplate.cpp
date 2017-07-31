@@ -23,20 +23,17 @@ struct RepoPathInfo
     vector<path_fragment> pathFragments;
 };
 
-string expandRepoUrlTemplate(const RepoConfig& repoConfig, vector<path_fragment>::const_iterator& iter, vector<path_fragment>::const_iterator& endIter)
+string expandRepoUrlTemplate(
+    const RepoConfig& repoConfig,
+    vector<path_fragment>::const_iterator& iter,
+    vector<path_fragment>::const_iterator& endIter)
 {
     unordered_map<string, string> argValues;
+    auto url(repoConfig.urlTemplate);
     for (const auto& arg : repoConfig.args)
     {
-        argValues[arg] = *iter++;
-    }
-
-    string url(repoConfig.urlTemplate);
-    for (const auto& pair : argValues)
-    {
-        const auto& arg = pair.first;
-        const auto& argValue = pair.second;
         const auto token = "${" + arg + "}";
+        const auto& argValue = *iter++;
         const auto findIter = url.find(token);
         if (findIter != string::npos)
         {
@@ -47,7 +44,9 @@ string expandRepoUrlTemplate(const RepoConfig& repoConfig, vector<path_fragment>
     return url;
 }
 
-RepoPathInfo resolveRepoPathInfo(const unordered_map<string, RepoConfig>& repoConfigs, const vector<path_fragment>& pathFragments)
+RepoPathInfo resolveRepoPathInfo(
+    const unordered_map<string, RepoConfig>& repoConfigs,
+    const vector<path_fragment>& pathFragments)
 {
     if (pathFragments.size() < 1)
     {
@@ -80,7 +79,7 @@ int main()
     unordered_map<string, RepoConfig> repoConfigs;
     repoConfigs.emplace(make_pair<string, RepoConfig>("gitlab", { { "group", "name" }, "git@gitlab.com:${group}/${name}.git" }));
 
-    const auto repoPathInfo = resolveRepoPathInfo(repoConfigs, { "gitlab", "group", "name", "commit", "a", "b", "c" });
+    const auto repoPathInfo = resolveRepoPathInfo(repoConfigs, { "gitlab", "xxx", "yyy", "commit", "a", "b", "c" });
     cout << repoPathInfo.url << endl;
     for (const auto& pathFragment : repoPathInfo.pathFragments)
     {
