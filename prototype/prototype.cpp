@@ -62,22 +62,22 @@ namespace
 
         return path;
     }
-}
 
-// Update the input string.
-std::string autoExpandEnvironmentVariables(const std::string& text)
-{
-    static std::regex env( "\\$\\{([^}]+)\\}" );
-    std::smatch match;
-    std::string result(text);
-    while (std::regex_search(result, match, env))
+    // Update the input string.
+    string autoExpandEnvironmentVariables(const string& text)
     {
-        const char * s = getenv( match[1].str().c_str() );
-        const std::string var( s == NULL ? "" : s );
-        result.replace( match[0].first, match[0].second, var );
-    }
+        static regex env( "\\$\\{([^}]+)\\}" );
+        smatch match;
+        string result(text);
+        while (regex_search(result, match, env))
+        {
+            const char* s = getenv(match[1].str().c_str());
+            const string var(s == nullptr ? "" : s);
+            result.replace(match[0].first, match[0].second, var);
+        }
 
-    return result;
+        return result;
+    }
 }
 
 class Prototype final : public FuseHandler
