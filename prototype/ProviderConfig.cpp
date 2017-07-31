@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #include "ProviderConfig.hpp"
+#include <iostream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -32,12 +34,8 @@ ProviderConfig::ProviderConfig(
     , _type(type)
     , _urlTemplate(urlTemplate)
     , _args(args)
+    , _hasRevision(type != "cache")
 {
-}
-
-const string& ProviderConfig::name() const
-{
-    return _name;
 }
 
 const string& ProviderConfig::type() const
@@ -45,7 +43,51 @@ const string& ProviderConfig::type() const
     return _type;
 }
 
-const string& ProviderConfig::urlTemplate() const
+RepoPathInfo ProviderConfig::resolvePath(const vector<path_element>& pathElements) const
 {
-    return _urlTemplate;
+    auto pathElementIter = pathElements.cbegin();
+    auto pathElementEndIter = pathElements.cend();
+
+    // Check that path begins with "/"
+    if (*pathElementIter++ != "/")
+    {
+        throw runtime_error("Invalid path");
+    }
+
+    // Check that provider specified in path matches this provider
+    string key = *pathElementIter++;
+    if (key != _name)
+    {
+        throw runtime_error("Invalid VCS provider");
+    }
+
+    auto url(_urlTemplate);
+    for (const auto& arg : _args)
+    {
+        const auto token = "${" + arg + "}";
+        const auto& argValue = *pathElementIter++;
+        key += "/" + argValue;
+        const auto findIter = url.find(token);
+        if (findIter != string::npos)
+        {
+            url.replace(findIter, token.size(), argValue);
+        }
+    }
+
+    // Add revision number to key: key is all of the user-supplied path up to
+    // and including the revision
+    string revision;
+    if (_hasRevision)
+    {
+        revision = *pathElementIter++;
+        key += "/" + revision;
+    }
+
+    return RepoPathInfo
+    {
+        key,
+        url,
+        revision,
+        { pathElementIter, pathElementEndIter }
+    };
 }

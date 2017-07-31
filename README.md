@@ -61,16 +61,19 @@ SourcesFS is configured using a `.sourcesfs` file in your home directory. Here's
 
 ```json
 {
-  "gitlab.com": {
+  "github": {
     "type": "git",
-    "url": "git@gitlab.com:${group}/${name}.git"
+    "args": ["user", "project"],
+    "url": "git@github.com:${user}/${project}.git"
   },
   "perforce-server": {
     "type": "p4",
+    "args": [],
     "url": "perforce-server:1667"
   },
   "cache": {
     "type": "cache",
+    "args": [],
     "url": "/path/to/local/directory"
   }
 }

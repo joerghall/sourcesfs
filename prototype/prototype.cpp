@@ -36,76 +36,32 @@
 using json = nlohmann::json;
 namespace fs = boost::filesystem;
 using namespace std;
-
 #include <string>
 #include <regex>
 
 namespace
 {
-using path_fragment = string;
-
-struct RepoConfig
-{
-    vector<string> args;
-    string urlTemplate;
-};
-
-struct RepoPathInfo
-{
-    const RepoConfig& repoConfig;
-    string url;
-    vector<path_fragment> pathFragments;
-};
-
-string expandRepoUrlTemplate(
-    const RepoConfig& repoConfig,
-    vector<path_fragment>::const_iterator& iter,
-    vector<path_fragment>::const_iterator& endIter)
-{
-    auto url(repoConfig.urlTemplate);
-    for (const auto& arg : repoConfig.args)
+    vector<path_element> splitAndNativizePath(const fs::path& path)
     {
-        const auto token = "${" + arg + "}";
-        const auto& argValue = *iter++;
-        const auto findIter = url.find(token);
-        if (findIter != string::npos)
+        vector<path_element> pathElements;
+        for (const auto& p : path)
         {
-            url.replace(findIter, token.size(), argValue);
+            pathElements.push_back(p.native());
         }
+
+        return pathElements;
     }
 
-    return url;
-}
-
-RepoPathInfo resolveRepoPathInfo(
-    const map<string, RepoConfig>& repoConfigs,
-    const vector<path_fragment>& pathFragments)
-{
-    if (pathFragments.size() < 1)
+    fs::path joinPaths(const vector<path_element>& pathElements)
     {
-        throw runtime_error("Invalid path");
+        fs::path path;
+        for (const auto& pathElement : pathElements)
+        {
+            path /= pathElement;
+        }
+
+        return path;
     }
-
-    auto pathFragmentIter = pathFragments.cbegin();
-    auto pathFragmentEndIter = pathFragments.cend();
-
-    const auto providerName = *pathFragmentIter++;
-    const auto repoConfigIter = repoConfigs.find(providerName);
-    if (repoConfigIter == repoConfigs.cend())
-    {
-        throw runtime_error("Could not find provider \"" + providerName + "\"");
-    }
-
-    const auto& repoConfig = repoConfigIter->second;
-    const auto url = expandRepoUrlTemplate(repoConfig, pathFragmentIter, pathFragmentEndIter);
-
-    return RepoPathInfo
-    {
-        repoConfig,
-        url,
-        { pathFragmentIter, pathFragmentEndIter }
-    };
-}
 }
 
 // Update the input string.
@@ -143,6 +99,7 @@ public:
 
 private:
     static std::map<std::string, ProviderConfig> makeProviderConfigs(const json& configs);
+public:
     fs::path FusePathToRealPath(const char* path);
 
 private:
@@ -177,119 +134,71 @@ map<string, ProviderConfig> Prototype::makeProviderConfigs(const json& configs)
     return providerConfigs;
 }
 
+namespace
+{
+    shared_ptr<Provider> makeProvider(const ProviderConfig& providerConfig, const RepoPathInfo& pathInfo)
+    {
+        if (providerConfig.type() == "git")
+        {
+            return make_shared<GitProvider>(pathInfo.url, pathInfo.revision, fs::temp_directory_path());
+        }
+        else if (providerConfig.type() == "p4")
+        {
+            return make_shared<P4Provider>(pathInfo.url, pathInfo.revision, fs::temp_directory_path());
+        }
+        else if (providerConfig.type() == "cache")
+        {
+            return make_shared<CacheProvider>(pathInfo.url);
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+}
+
 fs::path Prototype::FusePathToRealPath(const char* path)
 {
-    // Split path
-    fs::path p = path;
-    vector<string> elements;
-    for(auto& part : p)
-    {
-        elements.push_back(part.native());
-    }
-
-    if(elements.size())
+    const auto pathElements = splitAndNativizePath(path);
+    if (pathElements.size())
     {
         // Eliminate metadata files translations
         // https://apple.stackexchange.com/questions/14980/why-are-dot-underscore-files-created-and-how-can-i-avoid-them
-        if(0==elements.back().find("._"))
+        if (pathElements.back().find("._") == 0)
         {
             return "";
         }
     }
 
-    if(elements.size()<2)
+    if (pathElements.size() < 2)
     {
         return _defaultFallbackPath;
     }
 
-    auto it = _providerConfigs.find(elements[1]);
-    if(it == _providerConfigs.end())
+    const auto providerConfigIter = _providerConfigs.find(pathElements[1]);
+    if (providerConfigIter == _providerConfigs.cend())
     {
        return "";
     }
 
-    const ProviderConfig &conf = it->second;
     shared_ptr<Provider> provider;
-    fs::path relPath;
-    fs::path idPath;
-    int pathOffset=0;
-
-    if (conf.type() == "git")
+    const auto& providerConfig = providerConfigIter->second;
+    const auto pathInfo = providerConfig.resolvePath(pathElements);
+    const auto providerIter = _providers.find(pathInfo.key);
+    if (providerIter == _providers.end())
     {
-        pathOffset=5;
-        if (elements.size() >= pathOffset)
-        {
-            // Path exists as provider?
-            idPath = fs::path(elements[1]) / fs::path(elements[2]) / fs::path(elements[3]) / fs::path(elements[4]);
-            auto itProvider = _providers.find(idPath.string());
-            if (itProvider == _providers.end())
-            {
-                const ProviderConfig &conf = it->second;
-
-                // Prepare final url
-                string url = conf.urlTemplate();
-                auto f1 = url.find("${group}");
-                url.replace(f1, 8, elements[2]);
-                auto f2 = url.find("${name}");
-                url.replace(f2, 7, elements[3]);
-
-                provider = make_shared<GitProvider>(url, elements[4], fs::temp_directory_path());
-                _providers.insert(make_pair(idPath.string(), provider));
-            }
-            else
-            {
-                provider = itProvider->second;
-            }
-        }
+        provider = makeProvider(providerConfig, pathInfo);
+        _providers.insert(make_pair(pathInfo.key, provider));
     }
-    else if (conf.type() == "p4")
+    else
     {
-        pathOffset=3;
-        if (elements.size() >= pathOffset)
-        {
-            idPath = fs::path(elements[1]) / fs::path(elements[2]);
-
-            auto itProvider = _providers.find(idPath.string());
-            if (itProvider == _providers.end())
-            {
-                const ProviderConfig &conf = it->second;
-                provider = make_shared<P4Provider>(conf.urlTemplate(), elements[2], fs::temp_directory_path());
-                _providers.insert(make_pair(idPath.string(), provider));
-            }
-            else
-            {
-                provider = itProvider->second;
-            }
-        }
-    }
-    else if (conf.type() == "cache")
-    {
-        pathOffset=2;
-        if (elements.size() >= pathOffset)
-        {
-            idPath = fs::path(elements[1]);
-        }
-
-        auto itProvider = _providers.find(idPath.string());
-        if (itProvider == _providers.end())
-        {
-            const ProviderConfig &conf = it->second;
-            provider = make_shared<CacheProvider>(conf.urlTemplate());
-            _providers.insert(make_pair(idPath.string(), provider));
-        }
-        else
-        {
-            provider = itProvider->second;
-        }
+        provider = providerIter->second;
     }
 
     if (provider)
     {
-        for (auto element = elements.begin() + pathOffset; element != elements.end(); ++element)
-        {
-            relPath /= *element;
-        }
-        fs::path absPath = provider->retrieve(relPath);
+        const auto relPath = joinPaths(pathInfo.pathElements);
+        const auto absPath = provider->retrieve(relPath);
         return absPath.c_str();
     }
     else
@@ -415,16 +324,6 @@ json readDefaultConfig(const fs::path& configFileName)
 
 int main(int argc, char* argv[])
 {
-    map<string, RepoConfig> repoConfigs;
-    repoConfigs.emplace(make_pair<string, RepoConfig>("gitlab", { { "group", "name" }, "git@gitlab.com:${group}/${name}.git" }));
-
-    const auto repoPathInfo = resolveRepoPathInfo(repoConfigs, { "gitlab", "xxx", "yyy", "commit", "a", "b", "c" });
-    cout << repoPathInfo.url << endl;
-    for (const auto& pathFragment : repoPathInfo.pathFragments)
-    {
-        cout << "  " << pathFragment << endl;
-    }
-
     const fs::path configFileName = autoExpandEnvironmentVariables("${HOME}/.sourcesfs");
     if (!fs::exists(configFileName))
     {

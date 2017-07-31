@@ -24,6 +24,16 @@
 #include <string>
 #include <vector>
 
+using path_element = std::string;
+
+struct RepoPathInfo
+{
+    std::string key;
+    std::string url;
+    std::string revision;
+    std::vector<path_element> pathElements;
+};
+
 class ProviderConfig final
 {
 //public:
@@ -39,13 +49,13 @@ public:
         const std::string& urlTemplate,
         const std::vector<std::string>& args);
 
-    const std::string& name() const;
     const std::string& type() const;
-    const std::string& urlTemplate() const;
+    RepoPathInfo resolvePath(const std::vector<path_element>& pathElements) const;
 
 private:
     const std::string _name;
     const std::string _type;
     const std::string _urlTemplate;
     const std::vector<std::string> _args;
+    const bool _hasRevision;
 };
