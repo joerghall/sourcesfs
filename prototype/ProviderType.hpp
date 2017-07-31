@@ -21,45 +21,13 @@
 // SOFTWARE.
 #pragma once
 
-#include <memory>
 #include <string>
-#include <vector>
 
-using path_element = std::string;
-
-class Provider;
-enum class ProviderType;
-
-struct RepoPathInfo
+enum class ProviderType
 {
-    std::string key;
-    std::string url;
-    std::string revision;
-    std::vector<path_element> pathElements;
+    Cache,
+    Git,
+    P4
 };
 
-class ProviderConfig final
-{
-//public:
-//    ProviderConfig(ProviderConfig&) = default;
-//    ProviderConfig(ProviderConfig&&) = default;
-//    ProviderConfig& operator=(ProviderConfig&) = default;
-//    ProviderConfig& operator=(ProviderConfig&&) = default;
-
-public:
-    ProviderConfig(
-        const std::string& name,
-        ProviderType providerType,
-        const std::string& urlTemplate,
-        const std::vector<std::string>& args);
-
-    RepoPathInfo resolvePath(const std::vector<path_element>& pathElements) const;
-    std::shared_ptr<Provider> makeProvider(const std::string& url, const std::string& revision) const;
-
-private:
-    const std::string _name;
-    const ProviderType _providerType;
-    const std::string _urlTemplate;
-    const std::vector<std::string> _args;
-    const bool _hasRevision;
-};
+std::pair<bool, ProviderType> parseProviderType(const std::string& s);

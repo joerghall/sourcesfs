@@ -27,6 +27,7 @@ set(prototype_sources
     CacheProvider.cpp
     P4Provider.cpp
     ProviderConfig.cpp
+    ProviderType.cpp
 )
 
 set(prototype_headers
@@ -38,6 +39,7 @@ set(prototype_headers
     P4Provider.hpp
     Provider.hpp
     ProviderConfig.hpp
+    ProviderType.hpp
 )
 
 set(prototype_sources_test

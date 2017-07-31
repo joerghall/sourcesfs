@@ -19,28 +19,28 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#include "CacheProvider.hpp"
+#include "GitProvider.hpp"
+#include "P4Provider.hpp"
 #include "ProviderConfig.hpp"
+#include "ProviderType.hpp"
 #include <iostream>
 #include <stdexcept>
 
+namespace fs = boost::filesystem;
 using namespace std;
 
 ProviderConfig::ProviderConfig(
     const string& name,
-    const string& type,
+    ProviderType providerType,
     const string& urlTemplate,
     const vector<string>& args)
     : _name(name)
-    , _type(type)
+    , _providerType(providerType)
     , _urlTemplate(urlTemplate)
     , _args(args)
-    , _hasRevision(type != "cache")
+    , _hasRevision(providerType != ProviderType::Cache)
 {
-}
-
-const string& ProviderConfig::type() const
-{
-    return _type;
 }
 
 RepoPathInfo ProviderConfig::resolvePath(const vector<path_element>& pathElements) const
@@ -90,4 +90,19 @@ RepoPathInfo ProviderConfig::resolvePath(const vector<path_element>& pathElement
         revision,
         { pathElementIter, pathElementEndIter }
     };
+}
+
+shared_ptr<Provider> ProviderConfig::makeProvider(const string& url, const string& revision) const
+{
+    switch (_providerType)
+    {
+        case ProviderType::Cache:
+            return make_shared<CacheProvider>(url);
+        case ProviderType::Git:
+            return make_shared<GitProvider>(url, revision, fs::temp_directory_path());
+        case ProviderType::P4:
+            return make_shared<P4Provider>(url, revision, fs::temp_directory_path());
+        default:
+            return nullptr;
+    }
 }

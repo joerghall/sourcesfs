@@ -19,47 +19,28 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#pragma once
+#include "ProviderType.hpp"
+#include <utility>
 
-#include <memory>
-#include <string>
-#include <vector>
+using namespace std;
 
-using path_element = std::string;
-
-class Provider;
-enum class ProviderType;
-
-struct RepoPathInfo
+pair<bool, ProviderType> parseProviderType(const string& s)
 {
-    std::string key;
-    std::string url;
-    std::string revision;
-    std::vector<path_element> pathElements;
-};
-
-class ProviderConfig final
-{
-//public:
-//    ProviderConfig(ProviderConfig&) = default;
-//    ProviderConfig(ProviderConfig&&) = default;
-//    ProviderConfig& operator=(ProviderConfig&) = default;
-//    ProviderConfig& operator=(ProviderConfig&&) = default;
-
-public:
-    ProviderConfig(
-        const std::string& name,
-        ProviderType providerType,
-        const std::string& urlTemplate,
-        const std::vector<std::string>& args);
-
-    RepoPathInfo resolvePath(const std::vector<path_element>& pathElements) const;
-    std::shared_ptr<Provider> makeProvider(const std::string& url, const std::string& revision) const;
-
-private:
-    const std::string _name;
-    const ProviderType _providerType;
-    const std::string _urlTemplate;
-    const std::vector<std::string> _args;
-    const bool _hasRevision;
-};
+    if (s == "cache")
+    {
+        return make_pair(true, ProviderType::Cache);
+    }
+    else if (s == "git")
+    {
+        return make_pair(true, ProviderType::Git);
+    }
+    else if (s == "p4")
+    {
+        return make_pair(true, ProviderType::P4);
+    }
+    else
+    {
+        // Failed to parse provider type
+        return make_pair(false, ProviderType::Cache);
+    }
+}

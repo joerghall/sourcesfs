@@ -21,10 +21,9 @@
 // SOFTWARE.
 #include "FuseHandler.hpp"
 #include "FuseUtil.hpp"
-#include "GitProvider.hpp"
-#include "P4Provider.hpp"
-#include "CacheProvider.hpp"
+#include "Provider.hpp"
 #include "ProviderConfig.hpp"
+#include "ProviderType.hpp"
 #include <cstring>
 #include <dirent.h>
 #include <errno.h>
@@ -125,10 +124,17 @@ map<string, ProviderConfig> Prototype::makeProviderConfigs(const json& configs)
     for (const auto& config : configs.get<json::object_t>())
     {
         const auto& name = config.first;
-        const auto& type = config.second.at("type");
+
+        const string& typeStr = config.second.at("type");
+        const auto result = parseProviderType(typeStr);
+        if (!result.first)
+        {
+            throw runtime_error("Unsupported provider type \"" + typeStr + "\"");
+        }
+
         const auto& urlTemplate = config.second.at("url");
         const auto& args = config.second.at("args");
-        providerConfigs.insert(pair<string, ProviderConfig>(name, { name, type, urlTemplate, args }));
+        providerConfigs.insert(pair<string, ProviderConfig>(name, { name, result.second, urlTemplate, args }));
     }
 
     return providerConfigs;
@@ -136,25 +142,6 @@ map<string, ProviderConfig> Prototype::makeProviderConfigs(const json& configs)
 
 namespace
 {
-    shared_ptr<Provider> makeProvider(const ProviderConfig& providerConfig, const RepoPathInfo& pathInfo)
-    {
-        if (providerConfig.type() == "git")
-        {
-            return make_shared<GitProvider>(pathInfo.url, pathInfo.revision, fs::temp_directory_path());
-        }
-        else if (providerConfig.type() == "p4")
-        {
-            return make_shared<P4Provider>(pathInfo.url, pathInfo.revision, fs::temp_directory_path());
-        }
-        else if (providerConfig.type() == "cache")
-        {
-            return make_shared<CacheProvider>(pathInfo.url);
-        }
-        else
-        {
-            return nullptr;
-        }
-    }
 }
 
 fs::path Prototype::FusePathToRealPath(const char* path)
@@ -187,7 +174,7 @@ fs::path Prototype::FusePathToRealPath(const char* path)
     const auto providerIter = _providers.find(pathInfo.key);
     if (providerIter == _providers.end())
     {
-        provider = makeProvider(providerConfig, pathInfo);
+        provider = providerConfig.makeProvider(pathInfo.url, pathInfo.revision);
         _providers.insert(make_pair(pathInfo.key, provider));
     }
     else

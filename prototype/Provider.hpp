@@ -21,6 +21,8 @@
 // SOFTWARE.
 #pragma once
 
+#include <boost/filesystem.hpp>
+
 class Provider
 {
 public:
