@@ -22,18 +22,20 @@
 
 set(prototype_sources
     prototype.cpp
+    CacheProvider.cpp
     FuseUtil.cpp
     GitProvider.cpp
-    CacheProvider.cpp
+    MercurialProvider.cpp
     P4Provider.cpp
 )
 
 set(prototype_headers
     prototype.hpp
+    CacheProvider.hpp
     FuseHandler.hpp
     FuseUtil.hpp
     GitProvider.hpp
-    CacheProvider.hpp
+    MercurialProvider.hpp
     P4Provider.hpp
     Provider.hpp
 )

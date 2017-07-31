@@ -125,6 +125,7 @@ map<string, ProviderConfig> Prototype::makeProviderConfigs(const json& configs)
         const auto& name = config.first;
         const auto& type = config.second.at("type");
         const auto& url = config.second.at("url");
+        cout << "name=" << name << endl;
         providerConfigs.insert(pair<string, ProviderConfig>(name, ProviderConfig(name, type, url)));
     }
 
@@ -133,6 +134,8 @@ map<string, ProviderConfig> Prototype::makeProviderConfigs(const json& configs)
 
 fs::path Prototype::FusePathToRealPath(const char* path)
 {
+    cout << "FusePathToRealPath: path=" << path << endl;
+
     // Split path
     fs::path p = path;
     vector<string> elements;
@@ -175,6 +178,7 @@ fs::path Prototype::FusePathToRealPath(const char* path)
         {
             // Path exists as provider?
             idPath = fs::path(elements[1]) / fs::path(elements[2]) / fs::path(elements[3]) / fs::path(elements[4]);
+            cout << "Git: idPath=" << idPath << endl;
             auto itProvider = _providers.find(idPath.string());
             if (itProvider == _providers.end())
             {
@@ -234,6 +238,40 @@ fs::path Prototype::FusePathToRealPath(const char* path)
         else
         {
             provider = itProvider->second;
+        }
+    }
+    else if (conf.type() == "hg") {
+        pathOffset=5;
+        cout << "elements:" << endl;
+        for (const auto& element : elements)
+        {
+            cout << "  " << element << endl;
+        }
+
+        if (elements.size() >= pathOffset)
+        {
+            // Path exists as provider?
+            idPath = fs::path(elements[1]) / fs::path(elements[2]) / fs::path(elements[3]) / fs::path(elements[4]);
+            cout << "HG: idPath=" << idPath << endl;
+            auto itProvider = _providers.find(idPath.string());
+            if (itProvider == _providers.end())
+            {
+                const ProviderConfig &conf = it->second;
+
+                // Prepare final url
+                string url = conf.url();
+                auto f1 = url.find("${group}");
+                url.replace(f1, 8, elements[2]);
+                auto f2 = url.find("${name}");
+                url.replace(f2, 7, elements[3]);
+
+                provider = make_shared<GitProvider>(url, elements[4], fs::temp_directory_path());
+                _providers.insert(make_pair(idPath.string(), provider));
+            }
+            else
+            {
+                provider = itProvider->second;
+            }
         }
     }
 
