@@ -26,6 +26,7 @@ set(prototype_sources
     GitProvider.cpp
     CacheProvider.cpp
     P4Provider.cpp
+    ProviderConfig.cpp
 )
 
 set(prototype_headers
@@ -36,6 +37,7 @@ set(prototype_headers
     CacheProvider.hpp
     P4Provider.hpp
     Provider.hpp
+    ProviderConfig.hpp
 )
 
 set(prototype_sources_test
