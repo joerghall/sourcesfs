@@ -424,9 +424,6 @@ int main(int argc, char* argv[])
         cout << "  " << pathFragment << endl;
     }
 
-    return 0;
-
-    /*
     const fs::path configFileName = autoExpandEnvironmentVariables("${HOME}/.sourcesfs");
     if (!fs::exists(configFileName))
     {
@@ -443,5 +440,4 @@ int main(int argc, char* argv[])
     json config = readDefaultConfig(configFileName);
     Prototype prototype(defaultFallbackPath, config);
     return runFuse(argc, argv, prototype);
-    */
 }
