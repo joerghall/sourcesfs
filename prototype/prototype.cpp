@@ -169,8 +169,9 @@ map<string, ProviderConfig> Prototype::makeProviderConfigs(const json& configs)
     {
         const auto& name = config.first;
         const auto& type = config.second.at("type");
-        const auto& url = config.second.at("url");
-        providerConfigs.insert(pair<string, ProviderConfig>(name, ProviderConfig(name, type, url)));
+        const auto& urlTemplate = config.second.at("url");
+        const auto& args = config.second.at("args");
+        providerConfigs.insert(pair<string, ProviderConfig>(name, { name, type, urlTemplate, args }));
     }
 
     return providerConfigs;

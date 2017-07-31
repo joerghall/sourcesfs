@@ -23,10 +23,15 @@
 
 using namespace std;
 
-ProviderConfig::ProviderConfig(const string& name, const string& type, const string& urlTemplate)
-   : _name(name)
-   , _type(type)
-   , _urlTemplate(urlTemplate)
+ProviderConfig::ProviderConfig(
+    const string& name,
+    const string& type,
+    const string& urlTemplate,
+    const vector<string>& args)
+    : _name(name)
+    , _type(type)
+    , _urlTemplate(urlTemplate)
+    , _args(args)
 {
 }
 

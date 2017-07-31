@@ -22,6 +22,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 class ProviderConfig final
 {
@@ -32,7 +33,11 @@ class ProviderConfig final
 //    ProviderConfig& operator=(ProviderConfig&&) = default;
 
 public:
-    ProviderConfig(const std::string& name, const std::string& type, const std::string& urlTemplate);
+    ProviderConfig(
+        const std::string& name,
+        const std::string& type,
+        const std::string& urlTemplate,
+        const std::vector<std::string>& args);
 
     const std::string& name() const;
     const std::string& type() const;
@@ -42,4 +47,5 @@ private:
     const std::string _name;
     const std::string _type;
     const std::string _urlTemplate;
+    const std::vector<std::string> _args;
 };
