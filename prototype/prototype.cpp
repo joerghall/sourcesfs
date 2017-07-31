@@ -226,7 +226,7 @@ fs::path Prototype::FusePathToRealPath(const char* path)
                 const ProviderConfig &conf = it->second;
 
                 // Prepare final url
-                string url = conf.url();
+                string url = conf.urlTemplate();
                 auto f1 = url.find("${group}");
                 url.replace(f1, 8, elements[2]);
                 auto f2 = url.find("${name}");
@@ -252,7 +252,7 @@ fs::path Prototype::FusePathToRealPath(const char* path)
             if (itProvider == _providers.end())
             {
                 const ProviderConfig &conf = it->second;
-                provider = make_shared<P4Provider>(conf.url(), elements[2], fs::temp_directory_path());
+                provider = make_shared<P4Provider>(conf.urlTemplate(), elements[2], fs::temp_directory_path());
                 _providers.insert(make_pair(idPath.string(), provider));
             }
             else
@@ -273,7 +273,7 @@ fs::path Prototype::FusePathToRealPath(const char* path)
         if (itProvider == _providers.end())
         {
             const ProviderConfig &conf = it->second;
-            provider = make_shared<CacheProvider>(conf.url());
+            provider = make_shared<CacheProvider>(conf.urlTemplate());
             _providers.insert(make_pair(idPath.string(), provider));
         }
         else

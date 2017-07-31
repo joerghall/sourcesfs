@@ -32,14 +32,14 @@ class ProviderConfig final
 //    ProviderConfig& operator=(ProviderConfig&&) = default;
 
 public:
-    ProviderConfig(const std::string& name, const std::string& type, const std::string& url);
+    ProviderConfig(const std::string& name, const std::string& type, const std::string& urlTemplate);
 
     const std::string& name() const;
     const std::string& type() const;
-    const std::string& url() const;
+    const std::string& urlTemplate() const;
 
 private:
     const std::string _name;
     const std::string _type;
-    const std::string _url;
+    const std::string _urlTemplate;
 };

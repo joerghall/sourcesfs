@@ -23,10 +23,10 @@
 
 using namespace std;
 
-ProviderConfig::ProviderConfig(const string& name, const string& type, const string& url)
+ProviderConfig::ProviderConfig(const string& name, const string& type, const string& urlTemplate)
    : _name(name)
    , _type(type)
-   , _url(url)
+   , _urlTemplate(urlTemplate)
 {
 }
 
@@ -40,7 +40,7 @@ const string& ProviderConfig::type() const
     return _type;
 }
 
-const string& ProviderConfig::url() const
+const string& ProviderConfig::urlTemplate() const
 {
-    return _url;
+    return _urlTemplate;
 }
