@@ -14,6 +14,8 @@ sourcefs <mount point> --workdir <path> --config <path>
 git clone https://github.com/joerghall/sourcesfs.git sourcesfs-19fc775a34edbd2f560c9f7002299f728796ad5b
 cd sourcesfs-19fc775a34edbd2f560c9f7002299f728796ad5b
 git checkout 19fc775a34edbd2f560c9f7002299f728796ad5b
+
+https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1
 ```
 
 ```bash

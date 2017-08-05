@@ -21,6 +21,7 @@
 // SOFTWARE.
 #include "FuseHandler.hpp"
 #include "FuseUtil.hpp"
+#include "Prototype.hpp"
 #include "Provider.hpp"
 #include "ProviderConfig.hpp"
 #include "ProviderType.hpp"
@@ -61,51 +62,7 @@ namespace
 
         return path;
     }
-
-    // Update the input string.
-    string autoExpandEnvironmentVariables(const string& text)
-    {
-        static regex env( "\\$\\{([^}]+)\\}" );
-        smatch match;
-        string result(text);
-        while (regex_search(result, match, env))
-        {
-            const char* s = getenv(match[1].str().c_str());
-            const string var(s == nullptr ? "" : s);
-            result.replace(match[0].first, match[0].second, var);
-        }
-
-        return result;
-    }
 }
-
-class Prototype final : public FuseHandler
-{
-public:
-    Prototype(const Prototype&) = delete;
-    Prototype& operator=(const Prototype&) = delete;
-
-public:
-    Prototype(const fs::path& defaultFallbackPath, const json &config);
-    ~Prototype();
-
-    int getattr(const char* path, struct stat* stbuf) override;
-    int open(const char* path, struct fuse_file_info* fi) override;
-    int read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi) override;
-    int release(const char* path, struct fuse_file_info* fi) override;
-    int readdir(const char* path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi) override;
-    int releasedir(const char* path, struct fuse_file_info* fi) override;
-
-private:
-    static std::map<std::string, ProviderConfig> makeProviderConfigs(const json& configs);
-public:
-    fs::path FusePathToRealPath(const char* path);
-
-private:
-    const fs::path _defaultFallbackPath;
-    const std::map<std::string, ProviderConfig> _providerConfigs;
-    std::map<std::string, shared_ptr<Provider>> _providers;
-};
 
 Prototype::Prototype(const fs::path& defaultFallbackPath, const json& configs)
     : _defaultFallbackPath(defaultFallbackPath)
@@ -300,31 +257,4 @@ int Prototype::releasedir(const char* path, struct fuse_file_info* fi)
     return 0;
 }
 
-json readDefaultConfig(const fs::path& configFileName)
-{
-    fstream configFile(configFileName.c_str(), ios_base::in);
-    json j;
-    configFile >> j;
-    std::cout << std::setw(4) << j << std::endl;
-    return j;
-}
 
-int main(int argc, char* argv[])
-{
-    const fs::path configFileName = autoExpandEnvironmentVariables("${HOME}/.sourcesfs");
-    if (!fs::exists(configFileName))
-    {
-        throw runtime_error(string("No SourcesFS configuration file found at ") + configFileName.string());
-    }
-
-    // TODO: Derive this from configuration file!
-    const fs::path defaultFallbackPath = autoExpandEnvironmentVariables("${HOME}/test");
-    if (!fs::exists(defaultFallbackPath))
-    {
-        throw runtime_error(string("No default fallback path found at ") + defaultFallbackPath.string());
-    }
-
-    json config = readDefaultConfig(configFileName);
-    Prototype prototype(defaultFallbackPath, config);
-    return runFuse(argc, argv, prototype);
-}

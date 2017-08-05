@@ -19,15 +19,27 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 
 list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}/buildtools/cmake/components")
 
 set(CMAKE_CXX_STANDARD 14)
 
+if(APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.10)
+endif()
+
 project(sourcesfs)
 
 enable_testing()
+
+if(UNIX AND NOT APPLE)
+    add_definitions(-DCONFIG_LINUX)
+elseif(APPLE)
+    add_definitions(-DCONFIG_OSX)
+else()
+    add_definitions(-DCONFIG_WINDOWS)
+endif()
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
@@ -49,3 +61,32 @@ if(Boost_FOUND)
 endif()
 
 add_subdirectory(prototype)
+
+include(InstallRequiredSystemLibraries)
+#set(CPACK_PACKAGING_INSTALL_PREFIX “/opt/sourcesfs/{version}”)
+#CPACK_PROJECT_CONFIG_FILE
+set(CPACK_GENERATOR "TGZ")
+
+set(CPACK_PACKAGE_VERSION       "0.1.x.rxxxxxxxx")
+#set(CPACK_PACKAGE_VERSION_MAJOR "0")
+#set(CPACK_PACKAGE_VERSION_MINOR "1")
+#set(CPACK_PACKAGE_VERSION_PATCH "0")
+
+# RPM
+#set(CPACK_RPM_PACKAGE_NAME    "${CPACK_PACKAGE_NAME}")                done by default!
+#set(CPACK_RPM_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")             done by default!
+#set(CPACK_RPM_PACKAGE_RELEASE "1")                                    done by default, do alter if packaging errors have to be fixed!
+#set(CPACK_RPM_PACKAGE_RELEASE "2")                        activate, if the previous packaging was buggy and/or for fancy Linux distro specific numbering!
+#set(CPACK_RPM_PACKAGE_SUMMARY "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}") done by default!
+#set(CPACK_RPM_PACKAGE_VENDOR  "${CPACK_PACKAGE_VENDOR}")              done by default!
+
+#if(BUILD_X64)
+#    set(CPACK_RPM_PACKAGE_ARCH "x86_64")
+#else(BUILD_X32)
+#    set(CPACK_RPM_PACKAGE_ARCH "i386")
+#endif(BUILD_X64)
+set(CPACK_RPM_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCH}.rpm")
+set(CPACK_RPM_PACKAGE_LICENSE "${CPACK_RESOURCE_FILE_LICENSE}")
+
+# DEB
+include(CPack)

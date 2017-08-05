@@ -43,13 +43,19 @@ add_definitions(
 add_executable(sourcesfs
     ${prototype_sources}
     ${prototype_headers}
-)
+    sourcesfs.cpp sourcesfs.h)
 
 set(common_LIBRARIES ${Boost_LIBRARIES} ${fuse_LIBRARIES})
 
 target_link_libraries(sourcesfs
     ${common_LIBRARIES}
 )
+
+#set_target_properties(sourcesfs PROPERTIES
+#    MACOSX_BUNDLE_BUNDLE_NAME SourcesFS
+#    MACOSX_FRAMEWORK_INFO_PLIST res/Info.plist
+#    MACOSX_BUNDLE_ICON_FILE res/app.ico
+#)
 
 # Prototype unittest
 #
@@ -62,11 +68,13 @@ add_executable(test_sourcesfs
     ${prototype_headers_test}
 )
 
+
 target_link_libraries(test_sourcesfs
-#    sourcesfs
     ${common_LIBRARIES}
 )
 
 add_test(NAME test_sourcesfs
     COMMAND test_sourcesfs
 )
+
+install(TARGETS sourcesfs RUNTIME DESTINATION bin)
