@@ -5,3 +5,6 @@ cmake-build-*
 release
 debug
 build
+
+*.pyc
+.DS_Store
