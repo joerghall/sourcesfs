@@ -70,7 +70,7 @@ json readDefaultConfig(const fs::path& configFileName)
 int main(int argc, char** argv)
 {
 
-    TCLAP::CmdLine cmd("SourcesFS - help to debug since 2017", ' ', "0.1");
+    TCLAP::CmdLine cmd("SourcesFS - help to debug since 2017", ' ', SOURCE_VERSION);
 
     TCLAP::ValueArg<std::string> argMountPoint("m", "mountpoint", "Mount point - default \"${HOME}/sourcesfs\"", false, "${HOME}/sourcesfs", "path", cmd);
     TCLAP::ValueArg<std::string> argWorkDir("w", "workdir", "Workdir or empty - default \"\"", false, "", "path", cmd);
@@ -98,13 +98,13 @@ int main(int argc, char** argv)
 #elif CONFIG_OSX
     unmount(argMountPoint.getValue().c_str(), MNT_FORCE);
 #endif
-
+    string mountPoint = autoExpandEnvironmentVariables(argMountPoint.getValue().c_str());
     std::vector<const char*> vecArgs;
     vecArgs.push_back("fuse");
     vecArgs.push_back("-f"); // Foreground
     vecArgs.push_back("-d"); // Debug
     vecArgs.push_back("-s"); // Sync
-    vecArgs.push_back(argMountPoint.getValue().c_str());
+    vecArgs.push_back(mountPoint.c_str());
     return runFuse(vecArgs.size(), const_cast<char**>(vecArgs.data()), prototype);
 
 }
