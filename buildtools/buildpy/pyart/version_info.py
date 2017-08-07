@@ -19,6 +19,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
+# https://github.com/joerghall/sourcesfs
+#
 from __future__ import print_function
 import os
 
@@ -81,7 +84,7 @@ class VersionInfo(object):
         if self._major > 0 or self._minor > 0:
             self._branch = self._branch.split("_")[0]
 
-        self._hash_long = git.rev_parse("HEAD").strip("\n\t ")
+        self._hash_long = git.rev_parse("HEAD").strip()
         self._hash = self._hash_long[0 : 8]
 
         self._version = "{}.{}.{}.r{}".format(self._major, self._minor, self._revision, self._hash)

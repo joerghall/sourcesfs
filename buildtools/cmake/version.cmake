@@ -19,6 +19,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
+# https://github.com/joerghall/sourcesfs
+#
 cmake_minimum_required(VERSION 3.0)
 
 # Discovers the version based on rules of the souce control system
@@ -37,6 +40,7 @@ function(discover_source_version)
         WORKING_DIRECTORY ${BUILD_TOOLS}/buildpy
         RESULT_VARIABLE VERSION_RESULT
         OUTPUT_VARIABLE VERSION_DATA
+        OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
     list(GET VERSION_DATA 0 SOURCE_BRANCH)

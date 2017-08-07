@@ -24,33 +24,25 @@
 #
 cmake_minimum_required(VERSION 3.0)
 
-list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_LIST_DIR}/components")
-list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_LIST_DIR}")
+# asource_map_prefix
+# Adds -fdebug-prefix-map option to compiler flags when supported: instead of
+# embedding absolute source paths in binaries, which will vary from build
+# to build
+function(source_map_prefix source_dir)
+    include(CheckCXXCompilerFlag)
 
-get_filename_component(temp_file_path ${CMAKE_CURRENT_LIST_DIR}/.. REALPATH)
-set(BUILD_TOOLS ${temp_file_path} CACHE PATH "Location of the buildtools" FORCE)
+    # Do not emit "failure" message to output
+    set(saved_CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET})
+    set(CMAKE_REQUIRED_QUIET 1)
+    check_cxx_compiler_flag(-fdebug-prefix-map=a=b SUPPORTS_DEBUG_PREFIX_MAP)
+    set(CMAKE_REQUIRED_QUIET ${saved_CMAKE_REQUIRED_QUIET})
 
-if(BUILD_BITNESS)
-else()
-    set(BUILD_BITNESS x86_64 CACHE STRING "Bitness of the build" FORCE)
-endif()
-
-if (APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.10)
-    set(BUILD_PLATFORM "osx${CMAKE_OSX_DEPLOYMENT_TARGET}" CACHE STRING "Platform of the build" FORCE)
-elseif(POSIX)
-    set(BUILD_PLATFORM centos7 CACHE STRING "Platform of the build" FORCE)
-endif()
-
-if (CMAKE_CONFIGURATION_TYPES)
-    message(STATUS "Multipe build configurations - IDE build")
-else ()
-    if (CMAKE_BUILD_TYPE)
-        set(BUILD_TYPE debug CACHE STRING "Build type" FORCE)
-    else ()
-        set(BUILD_TYPE release CACHE STRING "Build type" FORCE)
-    endif ()
-endif ()
-
-include(version)
-include(sourcemapprefix)
+    if(SUPPORTS_DEBUG_PREFIX_MAP)
+        message("-fdebug-prefix-map is supported")
+        message("Remapping source paths from ${CMAKE_SOURCE_DIR} to ${source_dir}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdebug-prefix-map=${CMAKE_SOURCE_DIR}=${source_dir}" PARENT_SCOPE)
+        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1" PARENT_SCOPE)
+    else()
+        message("-fdebug-prefix-map is not supported")
+    endif()
+endfunction()

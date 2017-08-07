@@ -19,6 +19,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
+# https://github.com/joerghall/sourcesfs
+#
 cmake_minimum_required(VERSION 3.0)
 
 if (WIN32)
@@ -31,10 +34,12 @@ elseif (APPLE)
 
     set(BUILD_OS osx CACHE STRING "Build operating system" FORCE)
     set(BUILD_OSX 1 CACHE STRING "Builds osx" FORCE)
+    set(BUILD_POSIX 1 CACHE STRING "Builds on posix platfrom" FORCE)
 
 elseif (UNIX)
 
     set(BUILD_LINUX 1 CACHE STRING "Builds Linux" FORCE)
+    set(BUILD_POSIX 1 CACHE STRING "Builds on posix platfrom" FORCE)
 
     if (EXISTS /etc/redhat-release)
         file(READ /etc/redhat-release release_file)
