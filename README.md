@@ -79,5 +79,14 @@ SourcesFS is configured using a `.sourcesfs` file in your home directory. Here's
 }
 ```
 
+## OSX brew
+
+```bash
+# Install tap
+brew tap joerghall/homebrew-repo
+# Install sourcesfs - this is work  in progress
+brew install Sourcesfs
+```
+
 [docker-file]: docker/ubuntu.docker
 [fuse-macos]: https://osxfuse.github.io

@@ -93,12 +93,14 @@ int main(int argc, char** argv)
     json config = readDefaultConfig(configFileName);
     Prototype prototype(defaultFallbackPath, config);
 
+    const string mountPoint = autoExpandEnvironmentVariables(argMountPoint.getValue().c_str());
+
 #ifdef CONFIG_LINUX
-    umount(argMountPoint.getValue().c_str(), MNT_FORCE);
+    umount(mountPoint.c_str(), MNT_FORCE);
 #elif CONFIG_OSX
-    unmount(argMountPoint.getValue().c_str(), MNT_FORCE);
+    unmount(mountPoint.c_str(), MNT_FORCE);
 #endif
-    string mountPoint = autoExpandEnvironmentVariables(argMountPoint.getValue().c_str());
+
     std::vector<const char*> vecArgs;
     vecArgs.push_back("fuse");
     vecArgs.push_back("-f"); // Foreground
