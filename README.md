@@ -39,6 +39,12 @@ umount ~/sourcesfs
 See [`docker/ubuntu.docker`][docker-file] for example Docker image for building `sourcesfs`.
 
 ```bash
+# Build and start docker
+make -C buildtools/docker
+docker run -v $HOME:/home/$USER  --rm -ti ubuntusourcesfs /bin/bash -c "useradd -u `id -u` -g 0 -M $USER && su - $USER"
+```
+
+```bash
 mkdir debug
 cd debug
 cmake -DCMAKE_CC_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 -DCMAKE_BUILD_TYPE=DEBUG -G "Unix Makefiles" ..
