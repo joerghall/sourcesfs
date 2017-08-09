@@ -94,5 +94,5 @@ brew tap joerghall/homebrew-repo
 brew install Sourcesfs
 ```
 
-[docker-file]: docker/ubuntu.docker
+[docker-file]: buildtools/docker/ubuntu.docker
 [fuse-macos]: https://osxfuse.github.io
