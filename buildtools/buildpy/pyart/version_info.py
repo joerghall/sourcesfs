@@ -50,7 +50,7 @@ def _get_upstream_branch(git):
     status, output, error = git.rev_parse("--abbrev-ref", "--symbolic-full-name", sym_name, can_fail=True)
     segments = output.split("/")
     if status == 0 and len(segments) == 2:
-        return True, output, segments[1]
+        return True, output.rstrip('\n'), segments[1].rstrip('\n')
     else:
         output = git.rev_parse("--abbrev-ref", "HEAD")
         output = output.rstrip('\n')

@@ -1,0 +1,14 @@
+FROM centos:7
+MAINTAINER Richard Cook <rcook@rcook.org>
+
+RUN yum -y update
+
+RUN yum -y install centos-release-scl
+
+RUN yum-config-manager --enable rhel-server-rhscl-7-rpms
+
+RUN yum -y install devtoolset-6
+
+RUN scl enable devtoolset-6 bash
+
+RUN echo "ALL  ALL=(ALL)  NOPASSWD: ALL" >> /etc/sudoers
