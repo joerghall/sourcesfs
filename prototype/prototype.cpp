@@ -21,7 +21,7 @@
 // SOFTWARE.
 #include "FuseHandler.hpp"
 #include "FuseUtil.hpp"
-#include "Prototype.hpp"
+#include "prototype.hpp"
 #include "Provider.hpp"
 #include "ProviderConfig.hpp"
 #include "ProviderType.hpp"
