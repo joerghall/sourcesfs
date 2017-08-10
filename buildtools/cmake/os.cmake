@@ -58,7 +58,7 @@ elseif (UNIX)
 
     elseif (release_file MATCHES "Fedora|CentOS|RedHat")
 
-        elseif (CMAKE_MATCH_0 STREQUAL "Fedora")
+        if (CMAKE_MATCH_0 STREQUAL "Fedora")
 
             set(BUILD_OS fc CACHE STRING "Build operating system" FORCE)
 
