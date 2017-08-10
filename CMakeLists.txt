@@ -35,7 +35,7 @@ project(sourcesfs)
 
 enable_testing()
 
-source_map_prefix("sourcesfs/github/joerghall/sourcesfs/${SOURCE_COMMIT_ID}")
+source_map_prefix("~/sourcesfs/github/joerghall/sourcesfs/${SOURCE_COMMIT_ID}")
 
 add_definitions(-DSOURCE_VERSION="${SOURCE_VERSION}")
 
@@ -75,10 +75,9 @@ set(CPACK_GENERATOR "TGZ")
 
 set(CPACK_PACKAGE_VERSION ${SOURCE_VERSION})
 set(CPACK_SYSTEM_NAME ${BUILD_PLATFORM})
-SET(CPACK_PACKAGE_FILE_NAME "sourcesfs-${BUILD_PLATFORM}-${BUILD_BITNESS}-${BUILD_TYPE}-${SOURCE_BRANCH}.${SOURCE_VERSION}")
-#set(CPACK_PACKAGE_VERSION_MAJOR "0")
-#set(CPACK_PACKAGE_VERSION_MINOR "0")
-#set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_FILE_NAME "sourcesfs-${BUILD_PLATFORM}-${BUILD_BITNESS}-${BUILD_TYPE}-${SOURCE_BRANCH}.${SOURCE_VERSION}")
+
+set(CPACK_PACKAGE_CONTACT joerghall@users.noreply.github.com)
 
 # RPM
 #set(CPACK_RPM_PACKAGE_NAME    "${CPACK_PACKAGE_NAME}")                done by default!
