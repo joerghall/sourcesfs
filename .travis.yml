@@ -6,4 +6,4 @@ services:
 
 before_install:
   - docker build -t ubuntusourcesfs -f ${TRAVIS_BUILD_DIR}/buildtools/docker/ubuntu.docker buildtools/docker
-  - docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs --rm -t ubuntusourcesfs /bin/bash -c "mkdir /root/sourcesfs/build && cd /root/sourcesfs/build && cmake -DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 -DCMAKE_BUILD_TYPE=DEBUG -G \"Unix Makefiles\" .. && cmake --build . && cpack -G DEP"
+  - docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs --rm -t ubuntusourcesfs /bin/bash -c "mkdir /root/sourcesfs/build && cd /root/sourcesfs/build && cmake -DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 -DCMAKE_BUILD_TYPE=DEBUG .. && cmake --build . && cpack -G DEP"
