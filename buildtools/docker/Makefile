@@ -1,6 +1,10 @@
 .PHONY: default
-default: ubuntusourcesfs
+default: ubuntusourcesfs centossourcesfs
 
-.PHONY: ubuntusourcesfs
+.PHONY: ubuntusourcesfs centossourcesfs
+
 ubuntusourcesfs:
 	docker build -t ubuntusourcesfs -f ubuntu.docker .
+
+centossourcesfs:
+	docker build -t centossourcesfs -f centos.docker .
