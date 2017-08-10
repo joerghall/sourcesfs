@@ -47,7 +47,11 @@ docker run -v $HOME:/home/$USER  --rm -ti ubuntusourcesfs /bin/bash -c "useradd 
 ```bash
 mkdir debug
 cd debug
-cmake -DCMAKE_CC_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 -DCMAKE_BUILD_TYPE=DEBUG -G "Unix Makefiles" ..
+# Ubuntu
+cmake -DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 -DCMAKE_BUILD_TYPE=DEBUG -G "Unix Makefiles" ..
+# Centos
+cmake -DCMAKE_C_COMPILER=/opt/rh/devtoolset-6/root/usr/bin/gcc -DCMAKE_CXX_COMPILER=/opt/rh/devtoolset-6/root/usr/bin/g++ -DCMAKE_BUILD_TYPE=DEBUG -G "Unix Makefiles" ..
+
 ```
 
 ### Run
