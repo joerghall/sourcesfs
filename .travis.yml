@@ -5,7 +5,7 @@ services:
 before_install:
 - docker build -t ubuntusourcesfs -f ${TRAVIS_BUILD_DIR}/buildtools/docker/ubuntu.docker
   buildtools/docker
-- docker build -t centossourcesfs -f ${TRAVIS_BUILD_DIR}/buildtools/docker/ubuntu.docker
+- docker build -t centossourcesfs -f ${TRAVIS_BUILD_DIR}/buildtools/docker/centos.docker
   buildtools/docker
 script:
 - docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs --rm -t ubuntusourcesfs /bin/bash
