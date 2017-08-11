@@ -12,7 +12,7 @@ script:
   -c "mkdir /root/sourcesfs/build_ubuntu && cd /root/sourcesfs/build_ubuntu && cmake
   -DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 -DCMAKE_BUILD_TYPE=Release ..
   && cmake --build . && cpack -G DEB"
-- docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs --rm -t ubuntusourcesfs /bin/bash
+- docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs --rm -t centossourcesfs /bin/bash
   -c "mkdir /root/sourcesfs/build_centos && cd /root/sourcesfs/build_centos && cmake
   -DCMAKE_C_COMPILER=/opt/rh/devtoolset-6/root/usr/bin/gcc -DCMAKE_CXX_COMPILER=/opt/rh/devtoolset-6/root/usr/bin/g++
   -DCMAKE_BUILD_TYPE=Release .. && cmake --build . && cpack -G RPM"
