@@ -42,6 +42,7 @@ See [`docker/ubuntu.docker`][docker-file] for example Docker image for building 
 # Build and start docker
 make -C buildtools/docker
 docker run -v $HOME:/home/$USER  --rm -ti ubuntusourcesfs /bin/bash -c "useradd -u `id -u` -g 0 -M $USER && su - $USER"
+docker run -v $HOME:/home/$USER  --rm -ti centossourcesfs /bin/bash -c "useradd -u `id -u` -g 0 -M $USER && su - $USER"
 ```
 
 ```bash

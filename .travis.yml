@@ -1,11 +1,26 @@
 language: c++
 sudo: required
-
 services:
-  - docker
-
+- docker
 before_install:
-  - docker build -t ubuntusourcesfs -f ${TRAVIS_BUILD_DIR}/buildtools/docker/ubuntu.docker buildtools/docker
-
+- docker build -t ubuntusourcesfs -f ${TRAVIS_BUILD_DIR}/buildtools/docker/ubuntu.docker
+  buildtools/docker
+- docker build -t centossourcesfs -f ${TRAVIS_BUILD_DIR}/buildtools/docker/ubuntu.docker
+  buildtools/docker
 script:
-  - docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs --rm -t ubuntusourcesfs /bin/bash -c "mkdir /root/sourcesfs/build && cd /root/sourcesfs/build && cmake -DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 -DCMAKE_BUILD_TYPE=DEBUG .. && cmake --build . && cpack -G DEB"
+- docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs --rm -t ubuntusourcesfs /bin/bash
+  -c "mkdir /root/sourcesfs/build_ubuntu && cd /root/sourcesfs/build_ubuntu && cmake
+  -DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 -DCMAKE_BUILD_TYPE=Release ..
+  && cmake --build . && cpack -G DEB"
+- docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs --rm -t ubuntusourcesfs /bin/bash
+  -c "mkdir /root/sourcesfs/build_centos && cd /root/sourcesfs/build_centos && cmake
+  -DCMAKE_C_COMPILER=/opt/rh/devtoolset-6/root/usr/bin/gcc -DCMAKE_CXX_COMPILER=/opt/rh/devtoolset-6/root/usr/bin/g++
+  -DCMAKE_BUILD_TYPE=Release .. && cmake --build . && cpack -G RPM"
+deploy:
+  provider: releases
+  api_key:
+    secure: Ewijp4mpdb66vtbwwKekumtF28vmV56bWWH2R0XSf26xfa6AyvVAkiyaXDLa7e5PZZbmukX8lIj1wa7GEyohEXarwX6G5178zwbiXn3FIKUABkUo+KoMfi+/6qWNS9IC4xRqZzCRrkYINl4B19e0YLop/3WlVmx2ImyWFly7Ziy6QeUmK1dkVEB5z4E7hQIZo3Qz/ruYc3RUZRKRo0lMp4BJ4Bc0aAxBhiqYNO3WPAZmzAaJ51opRNqnhsW3BzsQOhGxeCv5rwnL6vI0/tjysHZR+IUe8SFSD+EA6wtUud7tSPd02hdSbWV6JNQeKxYKwAzre7IErjSEpXziDkDiusUQg5cSRowtZRFcGVLBh7LprrlY4wKNI0CLqlOUbteabDUIEI9EuYQ8J3SvP24H8kHvuWWb6aDjmLiQyHUFheYyvggTeR987sElQjSgjfBbdeLsTw5wubmgiOzcVGTctOz94Z9DZYEdU6UsmSl/KKWEnECpqyvS4f7ZyMDgaXySnKwBmbPjeqUF9PKA4dWhTTUQS+QoQjqK4TlhLUeUt8m3RpDyVr7T+fhOT0dvarq8+Z1Qrn+RbC1g/S72X2oljUdjpnJPHm20vY0EA5Bqqjh/h1MxyX8TF/NxX7rM2yBoZcWSAv8KFVf69ZEnIHwIvkQtXyn+ZhpDbxz+GDnYEWw=
+  file: '${TRAVIS_BUILD_DIR}/build_ubuntu/*.dep'
+  file: '${TRAVIS_BUILD_DIR}/build_centos/*.rpm'
+  on:
+    repo: joerghall/sourcesfs
