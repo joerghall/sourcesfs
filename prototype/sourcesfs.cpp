@@ -41,6 +41,37 @@ using namespace std;
 
 namespace
 {
+
+#if 0
+    template<class A>
+    struct has_correct_replace_function
+    {
+        template<typename T, T> struct TypeCheck;
+
+        template<typename T> struct replace
+        {
+            typedef void(T::*fptr)(string::const_iterator i1, string::const_iterator i2, const std::string &);
+        };
+
+        template<typename T> static true_type test(TypeCheck<typename replace<T>::fptr, &T::replace>*);
+        template<typename T> static false_type test(...);
+    };
+#endif
+
+    template<typename T>
+    void replace(T& result, typename T::const_iterator first, typename T::const_iterator second, const enable_if_t<false, T>& var)
+    {
+        result.replace(first, second, var);
+    }
+
+    template<typename T>
+    void replace(T& result, typename T::const_iterator first, typename T::const_iterator second, const enable_if_t<true, T>& var)
+    {
+        const size_t firstOffset = first - result.begin();
+        const size_t secondOffset = second - result.begin();
+        result.replace(result.begin() + firstOffset, result.begin() + secondOffset, var);
+    }
+
     // Update the input string.
     string autoExpandEnvironmentVariables(const string& text)
     {
@@ -51,7 +82,7 @@ namespace
         {
             const char* s = getenv(match[1].str().c_str());
             const string var(s == nullptr ? "" : s);
-            result.replace(match[0].first, match[0].second, var);
+            replace(result, match[0].first, match[0].second, var);
         }
 
         return result;
