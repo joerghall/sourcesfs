@@ -15,7 +15,7 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     curl -O https://github.com/osxfuse/osxfuse/releases/download/osxfuse-3.6.3/osxfuse-3.6.3.dmg &&
     ls -l *.dmg &&
-    hdiutil attach osxfuse-3.6.3.dmg &&
+    hdiutil attach -imagekey diskimage-class=CRawDiskImage -nomount  osxfuse-3.6.3.dmg &&
     sudo installer -package "/Volumes/osxfuse-3.6.3/Extras/FUSE for macOS 3.6.3.pkg" -target / &&
     hdiutil unmount /Volumes/osxfuse-3.6.3 -quiet
   ; fi
