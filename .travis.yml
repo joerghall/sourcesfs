@@ -24,4 +24,4 @@ deploy:
   file: '${TRAVIS_BUILD_DIR}/build_centos/*.rpm'
   on:
     repo: joerghall/sourcesfs
-    tags: true
+    tags: false
