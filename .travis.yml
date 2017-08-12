@@ -13,7 +13,6 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker build -t centossourcesfs -f ${TRAVIS_BUILD_DIR}/buildtools/docker/centos.docker
   buildtools/docker ; fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    brew install boost &&
     curl -O https://github.com/osxfuse/osxfuse/releases/download/osxfuse-3.6.3/osxfuse-3.6.3.dmg &&
     hdiutil attach osxfuse-3.6.3.dmg &&
     sudo installer -package "/Volumes/osxfuse-3.6.3/Extras/FUSE for macOS 3.6.3.pkg" -target / &&
