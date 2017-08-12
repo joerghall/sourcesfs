@@ -16,8 +16,8 @@ before_install:
     curl -O https://github.com/osxfuse/osxfuse/releases/download/osxfuse-3.6.3/osxfuse-3.6.3.dmg &&
     ls -l *.dmg &&
     hdiutil attach -imagekey diskimage-class=CRawDiskImage -nomount  osxfuse-3.6.3.dmg &&
-    sudo installer -package /Volumes/FUSE for macOS/FUSE\ for\ macOS.pkg -target / &&
-    hdiutil unmount /Volumes/osxfuse-3.6.3 -quiet
+    sudo installer -package /Volumes/FUSE\ for\ macOS/FUSE\ for\ macOS.pkg -target / &&
+    hdiutil unmount /Volumes/FUSE\ for\ macOS -quiet
   ; fi
 
 script:
