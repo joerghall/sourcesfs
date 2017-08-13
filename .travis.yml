@@ -13,10 +13,10 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker build -t centossourcesfs -f ${TRAVIS_BUILD_DIR}/buildtools/docker/centos.docker
   buildtools/docker ; fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    curl -O https://github.com/osxfuse/osxfuse/releases/download/osxfuse-3.6.3/osxfuse-3.6.3.dmg &&
+    curl -L -O https://github.com/osxfuse/osxfuse/releases/download/osxfuse-3.6.3/osxfuse-3.6.3.dmg &&
     ls -l *.dmg &&
-    hdiutil attach -imagekey diskimage-class=CRawDiskImage -nomount  osxfuse-3.6.3.dmg &&
-    sudo installer -package /Volumes/FUSE\ for\ macOS/FUSE\ for\ macOS.pkg -target / &&
+    hdiutil mount osxfuse-3.6.3.dmg &&
+    sudo installer -pkg /Volumes/FUSE\ for\ macOS/FUSE\ for\ macOS.pkg -target / &&
     hdiutil unmount /Volumes/FUSE\ for\ macOS -quiet
   ; fi
 
