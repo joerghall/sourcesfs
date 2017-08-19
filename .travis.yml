@@ -46,9 +46,7 @@ deploy:
     repo: joerghall/sourcesfs
     tags: true
   provider: bintray
-  file: '${TRAVIS_BUILD_DIR}/build_ubuntu/*.dep'
-  file: '${TRAVIS_BUILD_DIR}/build_centos/*.rpm'
-  file: '${TRAVIS_BUILD_DIR}/build/*.tar.gz'
+  file: 'bintray_descriptor.json'
   on:
     all_branches: true
   user: joerghall
