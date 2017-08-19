@@ -48,7 +48,7 @@ deploy:
   provider: bintray
   file: '${TRAVIS_BUILD_DIR}/build_ubuntu/*.dep'
   file: '${TRAVIS_BUILD_DIR}/build_centos/*.rpm'
-  file: '${TRAVIS_BUILD_DIR}/build/*.tgz'
+  file: '${TRAVIS_BUILD_DIR}/build/*.tar.gz'
   on:
     all_branches: true
   user: joerghall
