@@ -2,7 +2,8 @@
   "package": {
     "name": "sourcesfs",
     "repo": "sourcesfs",
-    "subject": "joerghall"
+    "subject": "joerghall",
+    "licenses": ["MIT"]
   },
 
   "files":
