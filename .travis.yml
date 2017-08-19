@@ -41,6 +41,16 @@ deploy:
     secure: Ewijp4mpdb66vtbwwKekumtF28vmV56bWWH2R0XSf26xfa6AyvVAkiyaXDLa7e5PZZbmukX8lIj1wa7GEyohEXarwX6G5178zwbiXn3FIKUABkUo+KoMfi+/6qWNS9IC4xRqZzCRrkYINl4B19e0YLop/3WlVmx2ImyWFly7Ziy6QeUmK1dkVEB5z4E7hQIZo3Qz/ruYc3RUZRKRo0lMp4BJ4Bc0aAxBhiqYNO3WPAZmzAaJ51opRNqnhsW3BzsQOhGxeCv5rwnL6vI0/tjysHZR+IUe8SFSD+EA6wtUud7tSPd02hdSbWV6JNQeKxYKwAzre7IErjSEpXziDkDiusUQg5cSRowtZRFcGVLBh7LprrlY4wKNI0CLqlOUbteabDUIEI9EuYQ8J3SvP24H8kHvuWWb6aDjmLiQyHUFheYyvggTeR987sElQjSgjfBbdeLsTw5wubmgiOzcVGTctOz94Z9DZYEdU6UsmSl/KKWEnECpqyvS4f7ZyMDgaXySnKwBmbPjeqUF9PKA4dWhTTUQS+QoQjqK4TlhLUeUt8m3RpDyVr7T+fhOT0dvarq8+Z1Qrn+RbC1g/S72X2oljUdjpnJPHm20vY0EA5Bqqjh/h1MxyX8TF/NxX7rM2yBoZcWSAv8KFVf69ZEnIHwIvkQtXyn+ZhpDbxz+GDnYEWw=
   file: '${TRAVIS_BUILD_DIR}/build_ubuntu/*.dep'
   file: '${TRAVIS_BUILD_DIR}/build_centos/*.rpm'
+  file: '${TRAVIS_BUILD_DIR}/builds/*.tgz'
   on:
     repo: joerghall/sourcesfs
     tags: true
+  provider: bintray
+  file: '${TRAVIS_BUILD_DIR}/build_ubuntu/*.dep'
+  file: '${TRAVIS_BUILD_DIR}/build_centos/*.rpm'
+  file: '${TRAVIS_BUILD_DIR}/build/*.tgz'
+  on:
+    all_branches: true
+  user: joerghall
+  key:
+    secure: J5AGXO0Bz7IFsfFC+rFNIasIxWZ0yALklnrROArlQCkUs5lNcIcEoOevS1/JmcGJ3hUwzPFxt5J8uzTLl/FPfRR1pbXQ5msg2mvb9oLrJBCT2uEBosVZmu3O77S5fyHj3ex99OOCjqQvqgsiPPPjKXti2XuQEHkc4Q2NFNo4mUXTg104/yTUmZzZ6lTxQ+zGv8ZuV7/J9Ph7cDh+bFXxiYhn0/AOWOb/FRULMOQjqfH3P81bZtjJC7KM5qSDSAPAbhXWMXoSh+JJydBv3pvA8hTn484BHFz2t3+tRie4Hvd7UQeI+DvIOSVVN64yJgyF1RxRa+/Hb37ViIa0vUAD7QhBodJJBWycbRd2DyZ+0b81VM3yhlPmJC5OI5+s5Ad9J2/hcLBaMcjHTXJLlR7XyFhgjvM2S/L2TVuKQ5UTr0/JONCpKCKotG1ObAvL9AqVijjAVASgs/C0m+Zt3DhseUgta0gzUqicR9z8Y4EepLtBkdldXaqtDy/uIbJZOf+JF425lXeKU+YItFkMIr8hQgWt2/SgFwiSlEcmMAWAUHHBp9bwiOed4tY/EJpuvN0namOkefhwvVhsSkyuqYL6/Z7DeS0R13fhI3yW4VWJy5gGaa2a+gHI2qIho3EUT8V95Jcm4eOC5VMM8pZ88ylQ9gBEgaOzXKMJB9Y8AnrwsBI=
