@@ -1,8 +1,9 @@
 {
   "package": {
-    "name": "sourcesfs",
+    "name": "joerghall",
     "repo": "sourcesfs",
     "subject": "joerghall",
+    "vcs_url": "https://github.com/joerghall/sourcesfs.git",
     "licenses": ["MIT"]
   },
 
