@@ -46,7 +46,7 @@ deploy:
     repo: joerghall/sourcesfs
     tags: true
   provider: bintray
-  file: '${TRAVIS_BUILD_DIR}/bintray_descriptor.json'
+  file: '${TRAVIS_BUILD_DIR}/bintray_descriptor_final.json'
   on:
     all_branches: true
   user: joerghall

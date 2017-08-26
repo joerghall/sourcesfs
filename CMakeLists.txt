@@ -79,6 +79,9 @@ set(CPACK_PACKAGE_FILE_NAME "sourcesfs-${BUILD_PLATFORM}-${BUILD_BITNESS}-${BUIL
 
 set(CPACK_PACKAGE_CONTACT joerghall@users.noreply.github.com)
 
+string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%dT%H:%M:%S")
+configure_file(bintray_descriptor.json ${CMAKE_SOURCE_DIR}/bintray_descriptor_final.json)
+
 # RPM
 #set(CPACK_RPM_PACKAGE_NAME    "${CPACK_PACKAGE_NAME}")                done by default!
 #set(CPACK_RPM_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")             done by default!
