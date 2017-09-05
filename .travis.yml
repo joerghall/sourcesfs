@@ -1,9 +1,7 @@
 language: c++
-
 os:
-  - linux
-  - osx
-
+- linux
+- osx
 sudo: required
 services:
 - docker
@@ -12,43 +10,27 @@ before_install:
   buildtools/docker ; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker build -t centossourcesfs -f ${TRAVIS_BUILD_DIR}/buildtools/docker/centos.docker
   buildtools/docker ; fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    curl -L -O https://github.com/osxfuse/osxfuse/releases/download/osxfuse-3.6.3/osxfuse-3.6.3.dmg &&
-    ls -l *.dmg &&
-    hdiutil mount osxfuse-3.6.3.dmg &&
-    sudo installer -pkg /Volumes/FUSE\ for\ macOS/FUSE\ for\ macOS.pkg -target / &&
-    hdiutil unmount /Volumes/FUSE\ for\ macOS -quiet
-  ; fi
-
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then curl -L -O https://github.com/osxfuse/osxfuse/releases/download/osxfuse-3.6.3/osxfuse-3.6.3.dmg
+  && ls -l *.dmg && hdiutil mount osxfuse-3.6.3.dmg && sudo installer -pkg /Volumes/FUSE\
+  for\ macOS/FUSE\ for\ macOS.pkg -target / && hdiutil unmount /Volumes/FUSE\ for\
+  macOS -quiet ; fi
 script:
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-  docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs --rm -t ubuntusourcesfs /bin/bash
-  -c "mkdir /root/sourcesfs/build_ubuntu && cd /root/sourcesfs/build_ubuntu && cmake
-  -DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 -DCMAKE_BUILD_TYPE=Release ..
-  && cmake --build . && cpack -G DEB" ; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-  docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs --rm -t centossourcesfs /bin/bash
-  -c "mkdir /root/sourcesfs/build_centos && cd /root/sourcesfs/build_centos && cmake
-  -DCMAKE_C_COMPILER=/opt/rh/devtoolset-6/root/usr/bin/gcc -DCMAKE_CXX_COMPILER=/opt/rh/devtoolset-6/root/usr/bin/g++
-  -DCMAKE_BUILD_TYPE=Release .. && cmake --build . && cpack -G RPM" ; fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-  mkdir ${TRAVIS_BUILD_DIR}/build && cd ${TRAVIS_BUILD_DIR}/build && cmake .. && cmake --build . && cpack -G TGZ
-  ; fi
-
-deploy:
-  provider: releases
-  api_key:
-    secure: Ewijp4mpdb66vtbwwKekumtF28vmV56bWWH2R0XSf26xfa6AyvVAkiyaXDLa7e5PZZbmukX8lIj1wa7GEyohEXarwX6G5178zwbiXn3FIKUABkUo+KoMfi+/6qWNS9IC4xRqZzCRrkYINl4B19e0YLop/3WlVmx2ImyWFly7Ziy6QeUmK1dkVEB5z4E7hQIZo3Qz/ruYc3RUZRKRo0lMp4BJ4Bc0aAxBhiqYNO3WPAZmzAaJ51opRNqnhsW3BzsQOhGxeCv5rwnL6vI0/tjysHZR+IUe8SFSD+EA6wtUud7tSPd02hdSbWV6JNQeKxYKwAzre7IErjSEpXziDkDiusUQg5cSRowtZRFcGVLBh7LprrlY4wKNI0CLqlOUbteabDUIEI9EuYQ8J3SvP24H8kHvuWWb6aDjmLiQyHUFheYyvggTeR987sElQjSgjfBbdeLsTw5wubmgiOzcVGTctOz94Z9DZYEdU6UsmSl/KKWEnECpqyvS4f7ZyMDgaXySnKwBmbPjeqUF9PKA4dWhTTUQS+QoQjqK4TlhLUeUt8m3RpDyVr7T+fhOT0dvarq8+Z1Qrn+RbC1g/S72X2oljUdjpnJPHm20vY0EA5Bqqjh/h1MxyX8TF/NxX7rM2yBoZcWSAv8KFVf69ZEnIHwIvkQtXyn+ZhpDbxz+GDnYEWw=
-  file: '${TRAVIS_BUILD_DIR}/build_ubuntu/*.dep'
-  file: '${TRAVIS_BUILD_DIR}/build_centos/*.rpm'
-  file: '${TRAVIS_BUILD_DIR}/builds/*.tgz'
-  on:
-    repo: joerghall/sourcesfs
-    tags: true
-  provider: bintray
-  file: '${TRAVIS_BUILD_DIR}/bintray_descriptor_final.json'
-  on:
-    all_branches: true
-  user: joerghall
-  key:
-    secure: J5AGXO0Bz7IFsfFC+rFNIasIxWZ0yALklnrROArlQCkUs5lNcIcEoOevS1/JmcGJ3hUwzPFxt5J8uzTLl/FPfRR1pbXQ5msg2mvb9oLrJBCT2uEBosVZmu3O77S5fyHj3ex99OOCjqQvqgsiPPPjKXti2XuQEHkc4Q2NFNo4mUXTg104/yTUmZzZ6lTxQ+zGv8ZuV7/J9Ph7cDh+bFXxiYhn0/AOWOb/FRULMOQjqfH3P81bZtjJC7KM5qSDSAPAbhXWMXoSh+JJydBv3pvA8hTn484BHFz2t3+tRie4Hvd7UQeI+DvIOSVVN64yJgyF1RxRa+/Hb37ViIa0vUAD7QhBodJJBWycbRd2DyZ+0b81VM3yhlPmJC5OI5+s5Ad9J2/hcLBaMcjHTXJLlR7XyFhgjvM2S/L2TVuKQ5UTr0/JONCpKCKotG1ObAvL9AqVijjAVASgs/C0m+Zt3DhseUgta0gzUqicR9z8Y4EepLtBkdldXaqtDy/uIbJZOf+JF425lXeKU+YItFkMIr8hQgWt2/SgFwiSlEcmMAWAUHHBp9bwiOed4tY/EJpuvN0namOkefhwvVhsSkyuqYL6/Z7DeS0R13fhI3yW4VWJy5gGaa2a+gHI2qIho3EUT8V95Jcm4eOC5VMM8pZ88ylQ9gBEgaOzXKMJB9Y8AnrwsBI=
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs
+  --rm -t ubuntusourcesfs /bin/bash -c "mkdir /root/sourcesfs/build_ubuntu
+  && cd /root/sourcesfs/build_ubuntu
+  && cmake -DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 -DCMAKE_BUILD_TYPE=Release ..
+  && cmake --build . && cpack -G DEB
+  && cmake --build . -- bintray_upload" ; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs
+  --rm -t centossourcesfs /bin/bash -c "mkdir /root/sourcesfs/build_centos
+  && cd /root/sourcesfs/build_centos
+  && cmake -DCMAKE_C_COMPILER=/opt/rh/devtoolset-6/root/usr/bin/gcc -DCMAKE_CXX_COMPILER=/opt/rh/devtoolset-6/root/usr/bin/g++ -DCMAKE_BUILD_TYPE=Release ..
+  && cmake --build .
+  && cpack -G RPM
+  && cmake --build . -- bintray_upload" ; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then mkdir ${TRAVIS_BUILD_DIR}/build && cd
+  ${TRAVIS_BUILD_DIR}/build && cmake .. && cmake --build . && cpack -G TGZ && cmake --build . -- bintray_upload" ; fi
+env:
+  gobal:
+  - secure: gFAgMSJEjy495VUpJr9c1TekDVoH11vcMvCHAkPeEaLkN8j7W+1vQqMYsMdxP88TTwPR3cl17mauVOpTnRSFpfjOb3TqbjRp1fmjyj1DOhXrR4sWkSN6nLdPTgrXFCgDZHKbxoVtkNXV16ZcVMPFNBdScmo2osl2PPQfoWpoV+Xf04/El/ISRKt7lA2hsDoTNxPqHmEDBcaHO80VnCYPAs4ucybiizDrhK5uiGjz2MGVEj9AuWDpZDK1e4BJYF9z9AJHn6Hek/L1+jM7BqHHKSIouarJkaZcjvHZ6v0DxIxTevsmpXCmuEMa5UbUaXGkgq8T2rJfVle2bG0Tgz+mw74F8NN6sJaawu0/TUY2NlkU5uwkqZzBIwZ4tKHGQ6uGJ/2+HhqqkmJdjfbkweRfwTpZQPv1KKODq8AzXCsFF8hXn5aJOyPeAo92PApDUaGY5HPMTEcwl36Bg6rVoGMyWa+j/pQ0gnMiqVZpaSzqAWqI9hEXk4ZSurQv+kgq1jXs4G2loOYtYIntNQXnmWR/oAtoXEXWS3aZjMQoy1f7M31Wr3hWyhkRn3eJai+g5eVwu/kcsvxJCBN0uE00rqWuC82ia1ZLqkhopSp9mtkpf4a4nV3ITnc6Fwb5qf/EjS95vBmelqNgGT6jF2AoNWqM9xBf6SlV3ghe0AHMr5ssZgg=
+  - secure: Xus6ti5kGTC8rSPr3GLZIqZrTYdvMOkUI97Eqf6xrspVFLa7ecP2HJU3WX+vvc+zbNV7n4ptakVbN/YYvMKGK/BMB+OXX9UPkLOQAbMQR8tCVkbkEGrxyzNSg1sJiUy+h+WwVhWMuYto9wJxXUCL4I9VvNMLVrbUW9SOvyExTletdgBTyQbk8jiWpit4hwGtIg3FDogqL3J1/CnamZJV/iSu7WAA+o/csS8xPQIqrJHppspxNgVATkxAwVbpoMTU8lMDy1J2rBDvxqOXTjyqy8EhVsiXTg+AzD2SEy6HHL4D7GxE4D2tbZu+SmXc1vqNhwje6wbDLONqtgDdxc25hr2wgQleIWsvjayTDTdhlK58RtGTdxRDEaNy/OdRPd1RjVG01fB6Z/NNdED8eWxaGcdwS+km5QlasIoGNLOiAaSn4BRC2Rvyw2Gi6RtlsXxJ8xzEENl8zeyo0vEaU+NGcj7PfXC4bw6EVEEe+RE4gWBA1DS4kp0iQUEQdIg9xm4rDl5HWLtyA1X9Dx+bOg1t7G2WRhjC+5TH866gpS/Ix+oniQnz5T7Zw5+k1Br6ChzwU8mkTHQLArLKQJ9HaJPOXv4ry5aKol4i8thhaDaW3Em07o+ojBH7woD/555tb69e4Py1OBlQtEDhDCL0mzQnnwNX8aHGPctJpO4SkdqTmeM=

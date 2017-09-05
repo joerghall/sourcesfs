@@ -57,6 +57,7 @@ endif ()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(CPACK_OUTPUT_FILE_PREFIX ${CMAKE_BINARY_DIR}/packages)
 
 find_package(Boost
     COMPONENTS filesystem
@@ -80,7 +81,7 @@ set(CPACK_PACKAGE_FILE_NAME "sourcesfs-${BUILD_PLATFORM}-${BUILD_BITNESS}-${BUIL
 set(CPACK_PACKAGE_CONTACT joerghall@users.noreply.github.com)
 
 string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%dT%H:%M:%S")
-configure_file(bintray_descriptor.json ${CMAKE_SOURCE_DIR}/bintray_descriptor_final.json)
+#configure_file(bintray_descriptor.json ${CMAKE_SOURCE_DIR}/bintray_descriptor_final.json)
 
 # RPM
 #set(CPACK_RPM_PACKAGE_NAME    "${CPACK_PACKAGE_NAME}")                done by default!
@@ -100,3 +101,4 @@ configure_file(bintray_descriptor.json ${CMAKE_SOURCE_DIR}/bintray_descriptor_fi
 
 # DEB
 include(CPack)
+include(bintray)
