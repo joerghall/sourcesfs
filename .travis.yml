@@ -19,7 +19,7 @@ before_install:
   for\ macOS/FUSE\ for\ macOS.pkg -target / && hdiutil unmount /Volumes/FUSE\ for\
   macOS -quiet ; fi
 script:
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs -e apikey -e apiuser
   --rm -t ubuntusourcesfs /bin/bash -c "mkdir /root/sourcesfs/build_ubuntu
   && cd /root/sourcesfs/build_ubuntu
   && echo $apiuser
@@ -27,7 +27,7 @@ script:
   && cmake --build .
   && cpack -G DEB
   && cmake --build . -- bintray_upload" ; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run -v ${TRAVIS_BUILD_DIR}:/root/sourcesfs -e apikey -e apiuser
   --rm -t centossourcesfs /bin/bash -c "mkdir /root/sourcesfs/build_centos
   && cd /root/sourcesfs/build_centos
   && echo $apiuser
