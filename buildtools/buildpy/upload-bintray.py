@@ -33,7 +33,7 @@ import requests
 import sys
 
 API_BASE = os.environ.get("BINTRAY_URL", "https://api.bintray.com/content")
-PACKAGE_REGEX = re.compile(r"([^-]+)-([^-]+)-([^-]+)-([^-]+)-([^.]+?)\.(([^.]+)\.([^.]+?)\.([^.]+?)\.([^.]+?))\.(tgz|rpm|dep|tgz|zip)")
+PACKAGE_REGEX = re.compile(r"([^-]+)-([^-]+)-([^-]+)-([^-]+)-([^.]+?)\.(([^.]+)\.([^.]+?)\.([^.]+?)\.([^.]+?))\.(tgz|rpm|deb|tgz|zip)")
 SCRIPT_PATH = os.path.realpath(__file__)
 
 def upload(package_path, url, apiuser, apikey):
