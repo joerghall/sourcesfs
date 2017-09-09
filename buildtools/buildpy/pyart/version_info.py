@@ -76,7 +76,11 @@ class VersionInfo(object):
 
         git = Git(cwd, args)
 
-        (_, _, self._branch) = _get_upstream_branch(git)
+        if "TRAVIS_BRANCH" in os.environ:
+            self._branch = os.environ["TRAVIS_BRANCH"]
+        else:
+            (_, _, self._branch) = _get_upstream_branch(git)
+
         self._revision = _get_revision_count(git)
 
         (self._major, self._minor) = _parse_release_branch(self._branch)
