@@ -1,9 +1,0 @@
-FROM ubuntu:16.04
-MAINTAINER Richard Cook <rcook@rcook.org>
-
-RUN apt-get -y update
-RUN apt-get -y install software-properties-common
-RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
-RUN apt-get -y update
-RUN apt-get -y install build-essential cmake g++-6 gcc-6 git libboost-all-dev libfuse-dev sudo
-RUN echo "ALL  ALL=(ALL)  NOPASSWD: ALL" >> /etc/sudoers

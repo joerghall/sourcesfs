@@ -21,7 +21,7 @@
 # SOFTWARE.
 cmake_minimum_required(VERSION 3.5)
 
-include(buildtools/cmake/setup.cmake)
+include(_submodules/cbt/cmake/setup.cmake)
 
 discover_source_version()
 
